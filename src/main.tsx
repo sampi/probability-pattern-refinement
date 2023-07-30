@@ -5,8 +5,7 @@ import App from './App.tsx'
 
 import './index.css'
 
-// This element is hard-coded in /index.html
-// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+// eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- This element is hardcoded in /index.html
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
     <App />

@@ -5,11 +5,10 @@ import { FlatCompat } from '@eslint/eslintrc'
 import parserTS from '@typescript-eslint/parser'
 import configStandardWithTS from 'eslint-config-standard-with-typescript'
 
-// mimic CommonJS variables
-// ESLint would complain about the double underscore prefix, but we need it here
-/* eslint-disable-next-line @typescript-eslint/naming-convention */
+/**
+ * mimic CommonJS variables
+ */
 const __filename = fileURLToPath(import.meta.url)
-/* eslint-disable-next-line @typescript-eslint/naming-convention */
 const __dirname = path.dirname(__filename) ?? process.cwd()
 
 const compat = new FlatCompat({
@@ -30,7 +29,12 @@ export default [
   ...compat.plugins('react-refresh'),
   {
     files: ['**/*.ts', '**/*.tsx', '**/*.js'],
-    ignores: ['dist'],
+    ignores: [
+      'dist',
+      'src/vite-env.d.ts',
+      'vite.config.ts',
+      'eslint.config.js',
+    ],
     languageOptions: {
       parser: parserTS,
       parserOptions: {

@@ -1,5 +1,4 @@
-// There is something weird going on with the ESLint plugin 'import' and nanoid
-// eslint-disable-next-line import/namespace
+// eslint-disable-next-line import/namespace -- There is something weird going on with the ESLint plugin 'import'
 import { nanoid } from 'nanoid'
 import { create } from 'zustand'
 import { devtools, persist } from 'zustand/middleware'
