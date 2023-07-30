@@ -1,5 +1,13 @@
-import { useEffect, type ReactElement, useCallback, useState } from 'react'
+import {
+  useEffect,
+  type ReactElement,
+  useCallback,
+  useState,
+  useRef,
+  ChangeEventHandler,
+} from 'react'
 
+import { Modal } from './components/Modal/Modal'
 import { COUNTDOWN_SECONDS, SECOND_IN_MS } from './constants'
 import { GameStage, useStore } from './store'
 import { PlayResult, getRandomInt, getPlayResult } from './utils'
@@ -16,7 +24,15 @@ function App(): ReactElement {
 
   const [plays, setPlays] = useState<number>(0)
 
+  const nameInputRef = useRef<HTMLInputElement>(null)
+  const [showNameModal, setShowNameModal] = useState<boolean>(false)
+  const [lockNameModal, setLockNameModal] = useState<boolean>(true)
+
   const [stage, setStage] = useStore(({ stage, setStage }) => [stage, setStage])
+  const [playerName, setPlayer] = useStore(({ playerName, setPlayer }) => [
+    playerName,
+    setPlayer,
+  ])
   const { weapons, wins, losses, draws } = useStore(
     ({ weapons, wins, losses, draws }) => ({
       weapons,
@@ -25,15 +41,13 @@ function App(): ReactElement {
       draws,
     }),
   )
-  const { incrementWins, incrementLosses, incrementDraws, resetPlays } =
-    useStore(
-      ({ incrementWins, incrementLosses, incrementDraws, resetPlays }) => ({
-        incrementWins,
-        incrementLosses,
-        incrementDraws,
-        resetPlays,
-      }),
-    )
+  const { incrementWins, incrementLosses, incrementDraws } = useStore(
+    ({ incrementWins, incrementLosses, incrementDraws }) => ({
+      incrementWins,
+      incrementLosses,
+      incrementDraws,
+    }),
+  )
 
   /**
    * Get derived/computed state
@@ -41,6 +55,46 @@ function App(): ReactElement {
   useEffect(() => {
     setPlays(wins + losses + draws)
   }, [draws, losses, wins])
+
+  useEffect(() => {
+    setShowNameModal(playerName === '')
+  }, [playerName])
+
+  const handleNameInput: ChangeEventHandler<HTMLInputElement> = useCallback(
+    (event) => {
+      setLockNameModal(event.target.value === '')
+    },
+    [setLockNameModal],
+  )
+
+  const closeNameModal = useCallback(() => {
+    const newPlayerName = nameInputRef.current?.value ?? ''
+    if (newPlayerName === '') {
+      return
+    }
+    setPlayer(newPlayerName)
+
+    setShowNameModal(false)
+
+    setStage(GameStage.Ready)
+    setEnemyWeapon(null)
+    setPlayerWeapon(null)
+  }, [setPlayer, setStage])
+
+  const resetGame = useCallback(() => {
+    if (nameInputRef?.current != null) {
+      nameInputRef.current.value = ''
+    }
+
+    // setPlayer('')
+
+    setShowNameModal(true)
+    setLockNameModal(true)
+
+    setStage(GameStage.Ready)
+    setEnemyWeapon(null)
+    setPlayerWeapon(null)
+  }, [setStage])
 
   const startGame = useCallback(() => {
     setStage(GameStage.Countdown)
@@ -110,8 +164,55 @@ function App(): ReactElement {
         <h1 className="logo">Rock ⊕ Paper ⊕ Scissors</h1>
       </header>
       <main>
+        <Modal
+          open={showNameModal}
+          locked={lockNameModal}
+          onClose={closeNameModal}
+        >
+          <form
+            onSubmit={(event) => {
+              event.preventDefault()
+            }}
+          >
+            <input
+              ref={nameInputRef}
+              type="text"
+              name="name"
+              minLength={1}
+              placeholder=""
+              spellCheck={false}
+              autoCorrect="off"
+              autoComplete="name"
+              onChange={handleNameInput}
+            />
+            <button
+              formMethod="dialog"
+              disabled={lockNameModal}
+              onClick={closeNameModal}
+            >
+              Let’s play!
+            </button>
+            {/** @TODO handle ESC to cancel the dialog */}
+            {/* playerName !== '' && (
+              <button
+                formMethod="dialog"
+                onClick={() => {
+                  if (nameInputRef.current != null) {
+                    nameInputRef.current.value = playerName
+                  }
+                  closeNameModal()
+                }}
+              >
+                cancel
+              </button>
+              ) */}
+          </form>
+        </Modal>
+        <div>Current player: {playerName}</div>
         {stage === GameStage.Ready && (
-          <button onClick={startGame}>start</button>
+          <>
+            <button onClick={startGame}>start</button>
+          </>
         )}
         {stage === GameStage.Countdown && (
           <>
@@ -142,17 +243,19 @@ function App(): ReactElement {
         {stage === GameStage.Done && (
           <>
             <article className="enemyWeapon">
-              enemy: {enemyWeapon?.name}
+              computer: {enemyWeapon?.name}
             </article>
             <article className="playerWeapon">
-              player: {playerWeapon?.name}
+              {playerName}: {playerWeapon?.name}
             </article>
             {/* @TODO explain why (e.g. rock defeats scissors) */}
-            <div>player {result}</div>
+            <div>
+              {playerName} {result}
+            </div>
             <button onClick={startGame}>play again</button>
           </>
         )}
-        <button onClick={resetPlays}>reset</button>
+        <button onClick={resetGame}>new player</button>
       </main>
       <aside className="score">
         <article>

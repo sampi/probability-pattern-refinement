@@ -2,6 +2,7 @@
 import { nanoid } from 'nanoid'
 import { create } from 'zustand'
 import { devtools, persist } from 'zustand/middleware'
+import { immer } from 'zustand/middleware/immer'
 
 import { PREFIX } from './constants.ts'
 
@@ -17,21 +18,33 @@ export enum GameStage {
   Done,
 }
 
-export interface State {
-  weapons: Weapon[]
+type PlayerName = string
 
-  stage: GameStage
+interface Score {
   wins: number
   draws: number
   losses: number
 }
+
+type Leaderboard = Record<PlayerName, Score>
+
+export interface State extends Score {
+  weapons: Weapon[]
+
+  playerName: PlayerName
+
+  stage: GameStage
+
+  leaderboard: Leaderboard
+}
 export interface Actions {
   setStage: (newStage: GameStage) => void
+
+  setPlayer: (newPlayerName: PlayerName) => void
 
   incrementWins: () => void
   incrementDraws: () => void
   incrementLosses: () => void
-  resetPlays: () => void
 }
 
 const defaultWeapons: Weapon[] = (() => {
@@ -54,37 +67,78 @@ const defaultWeapons: Weapon[] = (() => {
     },
   ]
 })()
-const initialValues: State = {
-  weapons: defaultWeapons,
-  stage: GameStage.Ready,
+const initialScore: Score = {
   wins: 0,
   draws: 0,
   losses: 0,
 }
+const initialValues: State = {
+  weapons: defaultWeapons,
+  stage: GameStage.Ready,
+  playerName: '',
+  leaderboard: {},
+  ...initialScore,
+}
 
 type StoreState = State & Actions
 
-export const useStore = create<StoreState>()(
+function incrementScore(type: keyof Score, state: State): void {
+  /**
+   * I can't destructure `leaderboard` because the Proxy object breaks
+   */
+  const { playerName } = state
+
+  if (playerName !== '') {
+    if (state.leaderboard[playerName] == null) {
+      state.leaderboard[playerName] = initialScore
+    }
+    state.leaderboard[playerName][type]++
+  }
+
+  state[type]++
+}
+
+export const useStore = create(
   devtools(
     persist(
-      (set) => ({
+      immer<StoreState>((set) => ({
         ...initialValues,
+
         setStage: (newStage) => {
-          set(() => ({ stage: newStage }))
+          set((state) => {
+            state.stage = newStage
+          })
         },
+
+        setPlayer: (newPlayerName) => {
+          set((state) => {
+            state.playerName = newPlayerName
+
+            const { wins, draws, losses } =
+              state.leaderboard[newPlayerName] ?? initialScore
+
+            state.wins = wins
+            state.draws = draws
+            state.losses = losses
+          })
+        },
+
         incrementWins: () => {
-          set((state) => ({ wins: state.wins + 1 }))
+          set((state) => {
+            incrementScore('wins', state)
+          })
         },
         incrementDraws: () => {
-          set((state) => ({ draws: state.draws + 1 }))
+          set((state) => {
+            incrementScore('draws', state)
+          })
         },
         incrementLosses: () => {
-          set((state) => ({ losses: state.losses + 1 }))
+          set((state) => {
+            incrementScore('losses', state)
+          })
         },
-        resetPlays: () => {
-          set(() => ({ wins: 0, draws: 0, losses: 0 }))
-        },
-      }),
+      })),
       {
         name: PREFIX,
         partialize: (state) =>
