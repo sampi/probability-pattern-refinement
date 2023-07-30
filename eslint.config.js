@@ -23,12 +23,13 @@ export default [
   ...compat.extends('standard-with-typescript'),
   ...compat.extends('plugin:prettier/recommended'),
   ...compat.extends('plugin:import/recommended'),
+  ...compat.extends('plugin:import/typescript'),
   ...compat.extends('plugin:react/recommended'),
   ...compat.extends('plugin:react/jsx-runtime'),
   ...compat.extends('plugin:react-hooks/recommended'),
   ...compat.plugins('react-refresh'),
   {
-    files: ['**/*.ts(x)', '**/*.js'],
+    files: ['**/*.ts', '**/*.tsx', '**/*.js'],
     ignores: ['dist'],
     languageOptions: {
       parser: parserTS,
@@ -40,8 +41,11 @@ export default [
       },
     },
     settings: {
-      react: {
+      'react': {
         version: 'detect',
+      },
+      'import/resolver': {
+        typescript: true,
       },
     },
     rules: {
