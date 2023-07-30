@@ -1,8 +1,10 @@
+// There is something weird going on with the ESLint plugin 'import' and nanoid
+// eslint-disable-next-line import/namespace
+import { nanoid } from 'nanoid'
 import { create } from 'zustand'
 import { devtools, persist } from 'zustand/middleware'
 
-import { PREFIX } from './constants'
-import { nanoid } from 'nanoid'
+import { PREFIX } from './constants.ts'
 
 export interface Weapon {
   id: string
@@ -63,14 +65,29 @@ export const useStore = create<StoreState>()(
     persist(
       (set) => ({
         ...initialValues,
-        setStage: (newStage) => set(() => ({ stage: newStage })),
-        incrementWins: () => set((state) => ({ wins: state.wins + 1 })),
-        incrementDraws: () => set((state) => ({ draws: state.draws + 1 })),
-        incrementLosses: () => set((state) => ({ losses: state.losses + 1 })),
-        resetPlays: () => set(() => ({ wins: 0, draws: 0, losses: 0 })),
+        setStage: (newStage) => {
+          set(() => ({ stage: newStage }))
+        },
+        incrementWins: () => {
+          set((state) => ({ wins: state.wins + 1 }))
+        },
+        incrementDraws: () => {
+          set((state) => ({ draws: state.draws + 1 }))
+        },
+        incrementLosses: () => {
+          set((state) => ({ losses: state.losses + 1 }))
+        },
+        resetPlays: () => {
+          set(() => ({ wins: 0, draws: 0, losses: 0 }))
+        },
       }),
       {
         name: PREFIX,
+        partialize: (state) =>
+          Object.fromEntries(
+            // Don't persist 'stage' in localStorage
+            Object.entries(state).filter(([key]) => !['stage'].includes(key)),
+          ),
       },
     ),
   ),
