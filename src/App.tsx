@@ -1,40 +1,37 @@
-import { useState } from 'react'
-
-import reactLogo from './assets/react.svg'
-
 import './App.css'
 
-import type { ReactElement } from 'react'
+import { useEffect, type ReactElement } from 'react'
+import { useStore } from './store'
 
 function App(): ReactElement {
-  const [count, setCount] = useState(0)
+  const weapons = useStore((state) => state.weapons)
+  const incrementWins = useStore((state) => state.incrementWins)
+  const resetPlays = useStore((state) => state.resetPlays)
+
+  const setStage = useStore((state) => state.setStage)
+
+  useEffect(() => {
+    setStage('ready')
+  }, [])
 
   return (
     <>
-      <div>
-        <a href="https://vitejs.dev" target="_blank" rel="noreferrer">
-          <img src={reactLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank" rel="noreferrer">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button
-          onClick={() => {
-            setCount((count) => count + 1)
-          }}
-        >
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
+      <header>
+        <h1 className="logo">Rock ⊕ Paper ⊕ Scissors</h1>
+      </header>
+      <main>
+        <ul className="weapons">
+          {weapons.map((weapon) => (
+            <li key={weapon.id}>
+              <button className="attack weapon" onClick={incrementWins}>
+                {weapon.name}
+              </button>
+            </li>
+          ))}
+        </ul>
+        <button onClick={resetPlays}>reset</button>
+      </main>
+      <aside className="score"></aside>
     </>
   )
 }
