@@ -1,38 +1,22 @@
 import { useEffect, type ReactElement, useCallback, useState } from 'react'
-import { shallow } from 'zustand/shallow'
 
 import { COUNTDOWN_SECONDS, SECOND_IN_MS } from './constants'
 import { GameStage, useStore } from './store'
-import { getRandomInt } from './utils'
+import { PlayResult, getRandomInt, getPlayResult } from './utils'
 
 import './App.css'
 
 import type { Weapon } from './store'
-
-const enum PlayResult {
-  Win,
-  Lose,
-  Draw,
-}
-// type PlayResult = 'win' | 'lose' | 'draw'
-
-const getExplainer = (winner: string, loser: string): string => {
-  return `${winner} beats ${loser}`
-}
 
 function App(): ReactElement {
   const [countdown, setCountdown] = useState<number>(COUNTDOWN_SECONDS)
   const [playerWeapon, setPlayerWeapon] = useState<Weapon | null>(null)
   const [enemyWeapon, setEnemyWeapon] = useState<Weapon | null>(null)
   const [result, setResult] = useState<PlayResult | null>(null)
-  const [explainer, setExplainer] = useState<string | null>(null)
 
   const [plays, setPlays] = useState<number>(0)
 
-  const [stage, setStage] = useStore(
-    ({ stage, setStage }) => [stage, setStage],
-    shallow,
-  )
+  const [stage, setStage] = useStore(({ stage, setStage }) => [stage, setStage])
   const { weapons, wins, losses, draws } = useStore(
     ({ weapons, wins, losses, draws }) => ({
       weapons,
@@ -40,7 +24,6 @@ function App(): ReactElement {
       losses,
       draws,
     }),
-    shallow,
   )
   const { incrementWins, incrementLosses, incrementDraws, resetPlays } =
     useStore(
@@ -50,7 +33,6 @@ function App(): ReactElement {
         incrementDraws,
         resetPlays,
       }),
-      shallow,
     )
 
   /**
@@ -64,15 +46,11 @@ function App(): ReactElement {
     setStage(GameStage.Countdown)
     setCountdown(COUNTDOWN_SECONDS)
     /**
-     * Ideally, I wanted to set `enemyWeapon` at the last moment,
+     * Ideally, I wanted to set `enemyWeapon` at the last moment of the countdown
      * but `setStage()` fires faster via zustand than setEnemyWeapon via setState.
-     *
-     * I decided to set it when the round begins, if the player is a hacker,
-     * then they could use this to their advantage >;)
      */
     setEnemyWeapon(weapons[getRandomInt(weapons.length)])
     setPlayerWeapon(null)
-    setExplainer(null)
   }, [setStage, weapons])
 
   useEffect(() => {
@@ -99,35 +77,24 @@ function App(): ReactElement {
     if (stage === GameStage.Evaluating) {
       setStage(GameStage.Done)
 
-      if (playerWeapon?.id === enemyWeapon?.id) {
-        setResult(PlayResult.Draw)
-        incrementDraws()
-      } else if (
-        /**
-         * The logic here is written in a strange way, so we can combine the following checks:
-         * - player didn't select a weapon
-         * - player doesn't defeat the enemy
-         *
-         * This way there is only a single path dealing with the losing condition.
-         */
-        playerWeapon == null ||
-        !playerWeapon?.defeats?.includes(enemyWeapon?.id ?? '')
-      ) {
-        setResult(PlayResult.Lose)
-        incrementLosses()
-        if (playerWeapon != null && enemyWeapon != null) {
-          setExplainer(getExplainer(enemyWeapon.name, playerWeapon.name))
-        }
-      } else {
-        setResult(PlayResult.Win)
-        incrementWins()
-        if (playerWeapon != null && enemyWeapon != null) {
-          setExplainer(getExplainer(playerWeapon.name, enemyWeapon.name))
-        }
+      const result: PlayResult = getPlayResult(playerWeapon, enemyWeapon)
+      setResult(result)
+
+      switch (result) {
+        case PlayResult.Draw:
+          incrementDraws()
+          break
+        case PlayResult.Win:
+          incrementWins()
+          break
+        case PlayResult.Lose:
+          incrementLosses()
+          break
+        default:
+          break
       }
     }
   }, [
-    countdown,
     enemyWeapon,
     incrementDraws,
     incrementLosses,
@@ -180,7 +147,7 @@ function App(): ReactElement {
             <article className="playerWeapon">
               player: {playerWeapon?.name}
             </article>
-            <div>{explainer}</div>
+            {/* @TODO explain why (e.g. rock defeats scissors) */}
             <div>player {result}</div>
             <button onClick={startGame}>play again</button>
           </>
