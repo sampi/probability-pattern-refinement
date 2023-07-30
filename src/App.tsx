@@ -1,37 +1,38 @@
 import { useEffect, type ReactElement, useCallback, useState } from 'react'
 import { shallow } from 'zustand/shallow'
 
-import { COUNTDOWN_SECONDS } from './constants'
-import { useStore } from './store'
+import { COUNTDOWN_SECONDS, SECOND_IN_MS } from './constants'
+import { GameStage, useStore } from './store'
 import { getRandomInt } from './utils'
 
 import './App.css'
 
 import type { Weapon } from './store'
 
-type PlayOutcome = 'win' | 'lose' | 'draw'
+const enum PlayResult {
+  Win,
+  Lose,
+  Draw,
+}
+// type PlayResult = 'win' | 'lose' | 'draw'
 
-const getWeaponById = (
-  weaponId: Weapon['id'] | null,
-  weapons: Weapon[],
-): Weapon | undefined => {
-  if (weaponId == null) {
-    return
-  }
-
-  return weapons.find((weapon) => weapon.id === weaponId)
+const getExplainer = (winner: string, loser: string): string => {
+  return `${winner} beats ${loser}`
 }
 
 function App(): ReactElement {
-  const [countdown, setCountdown] = useState(COUNTDOWN_SECONDS)
-  const [playerWeaponId, setPlayerWeaponId] = useState<Weapon['id'] | null>(
-    null,
-  )
-  const [enemyWeaponId, setEnemyWeaponId] = useState<Weapon['id'] | null>(null)
-  const [playOutcome, setPlayOutcome] = useState<PlayOutcome | null>(null)
+  const [countdown, setCountdown] = useState<number>(COUNTDOWN_SECONDS)
+  const [playerWeapon, setPlayerWeapon] = useState<Weapon | null>(null)
+  const [enemyWeapon, setEnemyWeapon] = useState<Weapon | null>(null)
+  const [result, setResult] = useState<PlayResult | null>(null)
+  const [explainer, setExplainer] = useState<string | null>(null)
 
   const [plays, setPlays] = useState<number>(0)
 
+  const [stage, setStage] = useStore(
+    ({ stage, setStage }) => [stage, setStage],
+    shallow,
+  )
   const { weapons, wins, losses, draws } = useStore(
     ({ weapons, wins, losses, draws }) => ({
       weapons,
@@ -39,6 +40,7 @@ function App(): ReactElement {
       losses,
       draws,
     }),
+    shallow,
   )
   const { incrementWins, incrementLosses, incrementDraws, resetPlays } =
     useStore(
@@ -48,101 +50,92 @@ function App(): ReactElement {
         incrementDraws,
         resetPlays,
       }),
+      shallow,
     )
 
-  // derive number of plays from state
+  /**
+   * Get derived/computed state
+   */
   useEffect(() => {
     setPlays(wins + losses + draws)
   }, [draws, losses, wins])
 
-  const [stage, setStage] = useStore(
-    (state) => [state.stage, state.setStage],
-    shallow,
-  )
   const startGame = useCallback(() => {
-    setStage('countdown')
-    setEnemyWeaponId(null)
-    setPlayerWeaponId(null)
-  }, [setStage])
-
-  const decreaseCountdown = useCallback(() => {
-    setCountdown((currentCountdown) => currentCountdown - 1)
-  }, [setCountdown])
+    setStage(GameStage.Countdown)
+    setCountdown(COUNTDOWN_SECONDS)
+    /**
+     * Ideally, I wanted to set `enemyWeapon` at the last moment,
+     * but `setStage()` fires faster via zustand than setEnemyWeapon via setState.
+     *
+     * I decided to set it when the round begins, if the player is a hacker,
+     * then they could use this to their advantage >;)
+     */
+    setEnemyWeapon(weapons[getRandomInt(weapons.length)])
+    setPlayerWeapon(null)
+    setExplainer(null)
+  }, [setStage, weapons])
 
   useEffect(() => {
-    if (stage === 'countdown') {
+    let timeoutId: number | undefined
+
+    if (stage === GameStage.Countdown) {
       if (countdown > 0) {
-        setTimeout(decreaseCountdown, 1000)
+        timeoutId = setTimeout(() => {
+          setCountdown((c) => c - 1)
+        }, SECOND_IN_MS)
       } else {
-        setEnemyWeaponId(weapons[getRandomInt(weapons.length)].id)
-        setStage('finished')
+        setStage(GameStage.Evaluating)
       }
     }
-  }, [countdown, decreaseCountdown, setStage, stage, weapons])
+
+    return () => {
+      if (timeoutId != null && timeoutId !== 0) {
+        clearTimeout(timeoutId)
+      }
+    }
+  }, [countdown, setStage, stage])
 
   useEffect(() => {
-    // Check if we just finished a play
-    if (stage === 'finished' && countdown === 0) {
-      setCountdown(COUNTDOWN_SECONDS)
+    if (stage === GameStage.Evaluating) {
+      setStage(GameStage.Done)
 
-      let tmpPlayOutcome: PlayOutcome | null = null
-
-      // check who wins, auto-lose player if they didn't choose
-      if (playerWeaponId == null) {
-        // The player didn't choose a weapon
-        tmpPlayOutcome = 'lose'
-      } else if (playerWeaponId === enemyWeaponId) {
-        tmpPlayOutcome = 'draw'
-      } else {
-        const playerWeapon = getWeaponById(playerWeaponId, weapons) as Weapon
-        if (playerWeapon.defeats.includes(enemyWeaponId as string)) {
-          tmpPlayOutcome = 'win'
-        } else {
-          tmpPlayOutcome = 'lose'
+      if (playerWeapon?.id === enemyWeapon?.id) {
+        setResult(PlayResult.Draw)
+        incrementDraws()
+      } else if (
+        /**
+         * The logic here is written in a strange way, so we can combine the following checks:
+         * - player didn't select a weapon
+         * - player doesn't defeat the enemy
+         *
+         * This way there is only a single path dealing with the losing condition.
+         */
+        playerWeapon == null ||
+        !playerWeapon?.defeats?.includes(enemyWeapon?.id ?? '')
+      ) {
+        setResult(PlayResult.Lose)
+        incrementLosses()
+        if (playerWeapon != null && enemyWeapon != null) {
+          setExplainer(getExplainer(enemyWeapon.name, playerWeapon.name))
         }
-      }
-
-      /**
-       * Because I didn't want to duplicate the logic for the 'lose' outcome,
-       * it is stored in a temporary variable and then used in this block.
-       */
-      setPlayOutcome(tmpPlayOutcome)
-      switch (tmpPlayOutcome) {
-        case 'win':
-          incrementWins()
-          break
-        case 'lose':
-          incrementLosses()
-          break
-        case 'draw':
-          incrementDraws()
-          break
-        default:
-          break
+      } else {
+        setResult(PlayResult.Win)
+        incrementWins()
+        if (playerWeapon != null && enemyWeapon != null) {
+          setExplainer(getExplainer(playerWeapon.name, enemyWeapon.name))
+        }
       }
     }
   }, [
     countdown,
-    enemyWeaponId,
+    enemyWeapon,
     incrementDraws,
     incrementLosses,
     incrementWins,
-    playerWeaponId,
+    playerWeapon,
     setStage,
     stage,
-    weapons,
   ])
-
-  const playAgain = useCallback(() => {
-    setStage('countdown')
-  }, [setStage])
-
-  const chooseWeapon = useCallback(
-    (weaponId: Weapon['id']) => {
-      setPlayerWeaponId(weaponId)
-    },
-    [setPlayerWeaponId],
-  )
 
   return (
     <>
@@ -150,8 +143,10 @@ function App(): ReactElement {
         <h1 className="logo">Rock ⊕ Paper ⊕ Scissors</h1>
       </header>
       <main>
-        {stage === 'ready' && <button onClick={startGame}>start</button>}
-        {stage === 'countdown' && (
+        {stage === GameStage.Ready && (
+          <button onClick={startGame}>start</button>
+        )}
+        {stage === GameStage.Countdown && (
           <>
             <section className="countdown">{countdown}</section>
             <ul className="weapons">
@@ -160,14 +155,14 @@ function App(): ReactElement {
                   key={weapon.id}
                   className={[
                     'weapon',
-                    weapon.id === playerWeaponId && 'active',
+                    weapon.id === playerWeapon?.id && 'active',
                   ]
                     .filter(Boolean)
                     .join(' ')}
                 >
                   <button
                     onClick={() => {
-                      chooseWeapon(weapon.id)
+                      setPlayerWeapon(weapon)
                     }}
                   >
                     {weapon.name}
@@ -177,25 +172,17 @@ function App(): ReactElement {
             </ul>
           </>
         )}
-        {stage === 'finished' && (
+        {stage === GameStage.Done && (
           <>
             <article className="enemyWeapon">
-              enemy: {getWeaponById(enemyWeaponId, weapons)?.name}
+              enemy: {enemyWeapon?.name}
             </article>
             <article className="playerWeapon">
-              player: {getWeaponById(playerWeaponId, weapons)?.name}
+              player: {playerWeapon?.name}
             </article>
-            <div>
-              {playOutcome === 'win'
-                ? getWeaponById(playerWeaponId, weapons)?.name
-                : getWeaponById(enemyWeaponId, weapons)?.name}{' '}
-              beats{' '}
-              {playOutcome === 'win'
-                ? getWeaponById(enemyWeaponId, weapons)?.name
-                : getWeaponById(playerWeaponId, weapons)?.name}
-            </div>
-            <div>player {playOutcome}</div>
-            <button onClick={playAgain}>play again</button>
+            <div>{explainer}</div>
+            <div>player {result}</div>
+            <button onClick={startGame}>play again</button>
           </>
         )}
         <button onClick={resetPlays}>reset</button>

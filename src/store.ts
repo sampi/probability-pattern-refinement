@@ -10,7 +10,12 @@ export interface Weapon {
   name: string
   defeats: Array<Weapon['id']>
 }
-type GameStage = 'ready' | 'countdown' | 'finished'
+export enum GameStage {
+  Ready,
+  Countdown,
+  Evaluating,
+  Done,
+}
 
 export interface State {
   weapons: Weapon[]
@@ -51,7 +56,7 @@ const defaultWeapons: Weapon[] = (() => {
 })()
 const initialValues: State = {
   weapons: defaultWeapons,
-  stage: 'ready',
+  stage: GameStage.Ready,
   wins: 0,
   draws: 0,
   losses: 0,
