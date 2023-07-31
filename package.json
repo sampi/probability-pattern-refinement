@@ -3,7 +3,7 @@
   "private": true,
   "version": "1.0.0",
   "type": "module",
-  "homepage": "https://sampi.github.io/probability-pattern-refinement",
+  "homepage": "https://probability.sampi.io/",
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
