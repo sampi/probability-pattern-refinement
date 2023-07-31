@@ -9,7 +9,13 @@
   table-layout: fixed;
 }
 
-.weapons-table thead th:first-child,
-.weapons-table tbody th {
-  text-align: left;
+.weapons-table .lose {
+  background-color: red;
+}
+.weapons-table .win {
+  background-color: green;
+}
+
+.weapons-table .rock {
+  border: 1px solid red;
 }

@@ -31,6 +31,9 @@ const initialNodes = [
     id: '0',
     data: { label: 'rock' },
     position: { x: coords[0][0], y: coords[0][1] },
+    style: {
+      border: '1px solid red',
+    },
   },
   {
     id: '1',
@@ -64,18 +67,30 @@ const initialEdges = [
     type: 'floating',
     markerEnd: {
       type: MarkerType.ArrowClosed,
+      width: 40,
+      height: 40,
+      color: 'red',
     },
     source: '0',
     target: '4',
+    style: {
+      stroke: 'red',
+    },
   },
   {
     id: 'e0-2',
     type: 'floating',
     markerEnd: {
       type: MarkerType.ArrowClosed,
+      width: 40,
+      height: 40,
+      color: 'red',
     },
     source: '0',
     target: '2',
+    style: {
+      stroke: 'red',
+    },
   },
 
   {

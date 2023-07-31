@@ -203,17 +203,32 @@ function App(): ReactElement {
                       <div>Player</div>
                     </th>
                     {weaponsArr.map((weapon) => (
-                      <th key={weapon.id}>{weapon.name}</th>
+                      <th
+                        key={weapon.id}
+                        className={encodeURIComponent(weapon.name)}
+                      >
+                        {weapon.name}
+                      </th>
                     ))}
                   </tr>
                 </thead>
                 <tbody>
                   {weaponsArr.map((playerWeapon) => (
                     <tr key={playerWeapon.id}>
-                      <th>{playerWeapon.name}</th>
+                      <th className={encodeURIComponent(playerWeapon.name)}>
+                        {playerWeapon.name}
+                      </th>
                       {weaponsArr.map((enemyWeapon) => (
                         <td key={`${enemyWeapon.name}-${playerWeapon.name}`}>
                           <button
+                            className={[
+                              getPlayResult(playerWeapon, enemyWeapon) ===
+                                PlayResult.Win && 'win',
+                              getPlayResult(playerWeapon, enemyWeapon) ===
+                                PlayResult.Lose && 'lose',
+                            ]
+                              .filter(Boolean)
+                              .join(' ')}
                             disabled={
                               getPlayResult(playerWeapon, enemyWeapon) ===
                               PlayResult.Draw
