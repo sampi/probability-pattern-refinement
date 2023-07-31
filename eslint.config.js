@@ -58,6 +58,8 @@ export default [
         'warn',
         { allowConstantExport: true },
       ],
+      /* I ran into issues with this rule using the flat ESLint config style */
+      'import/namespace': 'off',
       /* For readability, I prefer to have the imports in order, separated by newlines */
       'import/order': [
         'error',
