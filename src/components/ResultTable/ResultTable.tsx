@@ -1,7 +1,9 @@
+import { getPlayResultText } from '../../utils'
+
 import './ResultTable.css'
 
 import type { PlayerName, Weapon } from '../../store'
-import { PlayResult, getPlayResultText } from '../../utils'
+import type { PlayResult } from '../../utils'
 import type { ReactElement } from 'react'
 
 interface ResultTableProps {

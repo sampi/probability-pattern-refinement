@@ -9,16 +9,22 @@ export type MinimalFromNode = Pick<
 export type MinimalToNode = Pick<Node, 'positionAbsolute'>
 
 /**
+ * Most of this code is from the React-Flow examples library, converted to TS
+ *
  * @see https://reactflow.dev/docs/examples/edges/floating-edges/
  */
 
-// this helper function returns the intersection point
-// of the line between the center of the intersectionNode and the target node
+/**
+ * This helper function returns the intersection point
+ * of the line between the center of the intersectionNode and the target node
+ */
 function getNodeIntersection(
   intersectionNode: MinimalFromNode,
   targetNode: MinimalToNode,
 ): XYPosition {
-  // https://math.stackexchange.com/questions/1724792/an-algorithm-for-finding-the-intersection-point-between-a-center-of-vision-and-a
+  /**
+   * @see https://math.stackexchange.com/questions/1724792/an-algorithm-for-finding-the-intersection-point-between-a-center-of-vision-and-a
+   */
   const {
     width: intersectionNodeWidth,
     height: intersectionNodeHeight,
@@ -54,7 +60,9 @@ function getNodeIntersection(
   return { x, y }
 }
 
-// returns the position (top,right,bottom or right) passed node compared to the intersection point
+/**
+ * Returns the position (top,right,bottom or right) passed node compared to the intersection point
+ */
 function getEdgePosition(
   node: MinimalFromNode,
   intersectionPoint: XYPosition,
@@ -86,7 +94,9 @@ function getEdgePosition(
   return Position.Top
 }
 
-// returns the parameters (sx, sy, tx, ty, sourcePos, targetPos) you need to create an edge
+/**
+ * Returns the parameters (sx, sy, tx, ty, sourcePos, targetPos) you need to create an edge
+ */
 export function getEdgeParams(
   source: MinimalFromNode,
   target: MinimalToNode,

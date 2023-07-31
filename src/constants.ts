@@ -12,6 +12,9 @@ export const COUNTDOWN_SECONDS = 3
 
 export const SECOND_IN_MS = 1000
 
+/**
+ * Debounce value in ms used for input fields
+ */
 export const DEBOUNCE_MS = 200
 
 export const GRAPH_CIRCLE_RADIUS = 250

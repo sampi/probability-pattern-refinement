@@ -17,7 +17,7 @@ import './App.css'
 import type { Weapon } from './store'
 import type { ReactElement, ChangeEventHandler } from 'react'
 
-function App(): ReactElement {
+export function App(): ReactElement {
   const [playerWeapon, setPlayerWeapon] = useState<Weapon | null>(null)
   const [enemyWeapon, setEnemyWeapon] = useState<Weapon | null>(null)
   const [result, setResult] = useState<PlayResult | null>(null)
@@ -213,5 +213,3 @@ function App(): ReactElement {
     </div>
   )
 }
-
-export default App

@@ -8,18 +8,22 @@ import './Leaderboard.css'
 import type { ReactElement } from 'react'
 
 export function Leaderboard(): ReactElement {
-  const { leaderboard } = useStore(
+  const { leaderboard, isLeaderboardEmpty } = useStore(
     ({ leaderboard }) => ({
       leaderboard,
+      isLeaderboardEmpty: Object.keys(leaderboard).length === 0,
     }),
     shallow,
   )
+
+  if (isLeaderboardEmpty) {
+    return <></>
+  }
 
   return (
     <section className="leaderboard">
       <h2>Quarterly Ranking</h2>
       <ul>
-        {/* @TODO empty state */}
         {Object.entries(leaderboard)
           .sort(([aName, aScore], [bName, bScore]) => {
             /** Return the player with most scores first */
