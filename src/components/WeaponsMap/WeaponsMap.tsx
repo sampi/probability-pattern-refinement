@@ -5,6 +5,7 @@ import ReactFlow, {
   useEdgesState,
   Background,
   MarkerType,
+  Edge,
 } from 'reactflow'
 import 'reactflow/dist/style.css'
 
@@ -26,6 +27,12 @@ function generateCoordinates(R, N) {
 
 const coords = generateCoordinates(250, 5)
 
+const sharedNodeStyle = () => ({
+  'border-radius': '50%',
+  'aspect-ratio': '1',
+  'line-height': '8rem',
+})
+
 const initialNodes = [
   {
     id: '0',
@@ -33,27 +40,40 @@ const initialNodes = [
     position: { x: coords[0][0], y: coords[0][1] },
     style: {
       border: '1px solid red',
+      ...sharedNodeStyle(),
     },
   },
   {
     id: '1',
     data: { label: 'paper' },
     position: { x: coords[1][0], y: coords[1][1] },
+    style: {
+      ...sharedNodeStyle(),
+    },
   },
   {
     id: '2',
     data: { label: 'scissors' },
     position: { x: coords[2][0], y: coords[2][1] },
+    style: {
+      ...sharedNodeStyle(),
+    },
   },
   {
     id: '3',
     data: { label: 'Spock' },
     position: { x: coords[3][0], y: coords[3][1] },
+    style: {
+      ...sharedNodeStyle(),
+    },
   },
   {
     id: '4',
     data: { label: 'lizard' },
     position: { x: coords[4][0], y: coords[4][1] },
+    style: {
+      ...sharedNodeStyle(),
+    },
   },
 ]
 
@@ -61,112 +81,100 @@ const edgeTypes = {
   floating: FloatingEdge,
 }
 
+const markerEnd = (color?: string): Edge['markerEnd'] => ({
+  type: MarkerType.ArrowClosed,
+  width: 40,
+  height: 40,
+  color,
+})
+const sharedEdgeStyle = (color?: string): Edge['style'] => ({
+  stroke: color,
+})
+
 const initialEdges = [
   {
     id: 'e0-4',
     type: 'floating',
-    markerEnd: {
-      type: MarkerType.ArrowClosed,
-      width: 40,
-      height: 40,
-      color: 'red',
-    },
+    markerEnd: markerEnd('red'),
     source: '0',
     target: '4',
-    style: {
-      stroke: 'red',
-    },
+    style: sharedEdgeStyle('red'),
   },
   {
     id: 'e0-2',
     type: 'floating',
-    markerEnd: {
-      type: MarkerType.ArrowClosed,
-      width: 40,
-      height: 40,
-      color: 'red',
-    },
+    markerEnd: markerEnd('red'),
     source: '0',
     target: '2',
-    style: {
-      stroke: 'red',
-    },
+    style: sharedEdgeStyle('red'),
   },
 
   {
     id: 'e1-0',
     type: 'floating',
-    markerEnd: {
-      type: MarkerType.ArrowClosed,
-    },
+    markerEnd: markerEnd(),
     source: '1',
     target: '0',
+    style: sharedEdgeStyle(),
   },
   {
     id: 'e1-3',
     type: 'floating',
-    markerEnd: {
-      type: MarkerType.ArrowClosed,
-    },
+    markerEnd: markerEnd(),
     source: '1',
     target: '3',
+    style: sharedEdgeStyle(),
   },
 
   {
     id: 'e2-1',
     type: 'floating',
-    markerEnd: {
-      type: MarkerType.ArrowClosed,
-    },
+    markerEnd: markerEnd(),
     source: '2',
     target: '1',
+    style: sharedEdgeStyle(),
   },
   {
     id: 'e2-4',
     type: 'floating',
-    markerEnd: {
-      type: MarkerType.ArrowClosed,
-    },
+    markerEnd: markerEnd(),
     source: '2',
     target: '4',
+    style: sharedEdgeStyle(),
   },
 
   {
     id: 'e3-0',
     type: 'floating',
-    markerEnd: {
-      type: MarkerType.ArrowClosed,
-    },
+    markerEnd: markerEnd(),
     source: '3',
     target: '0',
+    style: sharedEdgeStyle(),
   },
   {
     id: 'e3-2',
     type: 'floating',
-    markerEnd: {
-      type: MarkerType.ArrowClosed,
-    },
+    markerEnd: markerEnd(),
     source: '3',
     target: '2',
+    style: sharedEdgeStyle(),
   },
 
   {
     id: 'e4-1',
     type: 'floating',
-    markerEnd: {
-      type: MarkerType.ArrowClosed,
-    },
+    markerEnd: markerEnd(),
     source: '4',
     target: '1',
+    style: sharedEdgeStyle(),
   },
   {
     id: 'e4-3',
     type: 'floating',
-    markerEnd: {
-      type: MarkerType.ArrowClosed,
-    },
+    markerEnd: markerEnd(),
     source: '4',
     target: '3',
+    style: sharedEdgeStyle(),
   },
 ]
 
