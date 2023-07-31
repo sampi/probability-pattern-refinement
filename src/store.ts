@@ -11,12 +11,6 @@ export interface Weapon {
   defeats: Array<Weapon['id']>
 }
 export type Weapons = Record<Weapon['id'], Weapon>
-export enum GameStage {
-  Ready,
-  Countdown,
-  Evaluating,
-  Done,
-}
 
 type PlayerName = string
 
@@ -33,13 +27,9 @@ export interface State extends Score {
 
   playerName: PlayerName
 
-  stage: GameStage
-
   leaderboard: Leaderboard
 }
 export interface Actions {
-  setStage: (newStage: GameStage) => void
-
   setPlayer: (newPlayerName: PlayerName) => void
 
   incrementWins: () => void
@@ -78,7 +68,6 @@ const initialScore: Score = {
 }
 const initialValues: State = {
   weapons: defaultWeapons,
-  stage: GameStage.Ready,
   playerName: '',
   leaderboard: {},
   ...initialScore,
@@ -107,12 +96,6 @@ export const useStore = create(
     persist(
       immer<StoreState>((set) => ({
         ...initialValues,
-
-        setStage: (newStage) => {
-          set((state) => {
-            state.stage = newStage
-          })
-        },
 
         setPlayer: (newPlayerName) => {
           set((state) => {
@@ -194,11 +177,6 @@ export const useStore = create(
       })),
       {
         name: PREFIX,
-        partialize: (state) =>
-          Object.fromEntries(
-            // Don't persist 'stage' in localStorage
-            Object.entries(state).filter(([key]) => !['stage'].includes(key)),
-          ),
       },
     ),
   ),

@@ -1,4 +1,4 @@
-import type { Weapon, Weapons } from './store'
+import type { Weapon } from './store'
 
 /**
  * Get a random integer
@@ -8,7 +8,7 @@ import type { Weapon, Weapons } from './store'
 export function getRandomInt(max: number = 1): number {
   const arr = new Uint32Array(1)
   window.crypto.getRandomValues(arr)
-  // convert to
+  // convert to float between 0...1, and then an int between 0...max
   return Math.floor((arr[0] / (0xffffffff + 1)) * max)
 }
 
@@ -42,4 +42,11 @@ export function getPlayResult(
 
 export function getGameTitle(weapons: Weapon[]): string {
   return weapons.map(({ name }) => name).join(' ⊕ ')
+}
+
+export enum GameStage {
+  Ready,
+  Countdown,
+  Evaluating,
+  Done,
 }
