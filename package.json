@@ -1,13 +1,16 @@
 {
-  "name": "rock-paper-scissors",
+  "name": "probability-pattern-refinement",
   "private": true,
-  "version": "0.0.0",
+  "version": "1.0.0",
   "type": "module",
+  "homepage": "https://sampi.github.io/probability-pattern-refinement",
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
     "lint": "eslint . --report-unused-disable-directives --max-warnings 0",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "predeploy": "npm run build",
+    "deploy": "gh-pages -d dist"
   },
   "dependencies": {
     "immer": "10.0.2",
@@ -19,7 +22,7 @@
   },
   "devDependencies": {
     "@eslint/eslintrc": "2.1.1",
-    "@types/react": "18.2.17",
+    "@types/react": "18.2.18",
     "@types/react-dom": "18.2.7",
     "@typescript-eslint/eslint-plugin": "5.62.0",
     "@vitejs/plugin-react-swc": "3.3.2",
@@ -34,6 +37,7 @@
     "eslint-plugin-react": "7.33.1",
     "eslint-plugin-react-hooks": "4.6.0",
     "eslint-plugin-react-refresh": "0.4.3",
+    "gh-pages": "^5.0.0",
     "prettier": "3.0.0",
     "typescript": "5.1.6",
     "vite": "4.4.7"
