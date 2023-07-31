@@ -52,6 +52,8 @@
   padding: 0;
 }
 
+dialog,
+::backdrop,
 :root {
   font-family: 'Rubik', sans-serif;
   line-height: 1.5;
@@ -194,7 +196,7 @@ ul {
   :root {
     --color-text: var(--colors-accent-300);
     --color-background: var(--colors-dark-300);
-    --color-grid-background: var(--colors-dark-300);
+    --color-grid-background: var(--colors-darkAlpha-300);
 
     scrollbar-color: var(--colors-gray-400) var(--colors-gray-600);
   }

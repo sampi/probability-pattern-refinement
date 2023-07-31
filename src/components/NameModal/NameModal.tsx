@@ -24,10 +24,6 @@ export function NameModal({
     playerName,
   }))
 
-  if (!showNameModal) {
-    return <></>
-  }
-
   return (
     <Modal
       className="name"

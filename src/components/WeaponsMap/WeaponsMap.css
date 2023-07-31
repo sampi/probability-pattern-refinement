@@ -1,6 +1,7 @@
 .weapons-map {
-  max-width: 100vw;
-  max-height: 60vh;
+  display: inline-block;
+  max-width: 40vw;
+  max-height: 100vh;
 }
 
 .weapons-circle .react-flow__handle {

@@ -11,7 +11,11 @@
 
 .weapon button {
   width: 100%;
+  max-width: 100%;
   padding-block: 2rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 @media (prefers-color-scheme: light) {

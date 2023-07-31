@@ -2,6 +2,8 @@ import { Modal } from '../Modal/Modal'
 import { WeaponsMap } from '../WeaponsMap/WeaponsMap'
 import { WeaponsTable } from '../WeaponsTable/WeaponsTable'
 
+import './EditorModal.css'
+
 import type { ReactElement } from 'react'
 
 export interface EditorModalProps {
@@ -12,13 +14,9 @@ export function EditorModal({
   showEditor,
   onCloseEditor,
 }: EditorModalProps): ReactElement {
-  if (!showEditor) {
-    return <></>
-  }
-
   return (
     <Modal
-      className="fullscreen"
+      className="editor"
       open={showEditor}
       locked={false}
       onClose={onCloseEditor}
@@ -27,6 +25,9 @@ export function EditorModal({
         <>
           <WeaponsTable />
           <WeaponsMap />
+          <div className="exit">
+            <button onClick={onCloseEditor}>Return</button>
+          </div>
         </>
       )}
     </Modal>

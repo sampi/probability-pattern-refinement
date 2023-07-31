@@ -1,10 +1,19 @@
 .weapons-table {
-  width: 100vw;
-  height: 40vh;
+  width: 60vw;
+  height: 100vh;
   text-align: center;
   table-layout: fixed;
 }
+.weapons-table th,
+.weapons-table th .control p,
+.weapons-table td {
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
 .weapons-table thead th:first-child {
+  width: 14rem;
   background: linear-gradient(
     to top right,
     rgb(0 0 0 / 0) 49%,
@@ -38,7 +47,7 @@
 }
 
 .weapons-table td button {
-  width: 90%;
+  width: 100%;
 }
 .weapons-table .lose,
 .weapons-table .win {

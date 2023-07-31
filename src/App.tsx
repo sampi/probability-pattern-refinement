@@ -64,14 +64,12 @@ function App(): ReactElement {
   useEffect(() => {
     setShowNameModal(playerName === '')
   }, [playerName])
-
   const handleNameInput: ChangeEventHandler<HTMLInputElement> = useCallback(
     (event) => {
       setForceNameModal(event.target.value === '')
     },
     [setForceNameModal],
   )
-
   const onCloseNameModal = useCallback(() => {
     const newPlayerName = nameInputRef.current?.value ?? ''
     if (newPlayerName !== '') {
@@ -97,7 +95,6 @@ function App(): ReactElement {
     setEnemyWeapon(null)
     setPlayerWeapon(null)
   }, [setStage])
-
   const startGame = useCallback(() => {
     setStage(GameStage.Countdown)
     setEnemyWeapon(null)

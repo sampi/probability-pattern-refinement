@@ -1,9 +1,9 @@
 import { useCallback, useRef, useState } from 'react'
 import { shallow } from 'zustand/shallow'
 
-import { COLORS } from '../../constants'
+import { COLORS, NUM_MAX_WEAPONS, NUM_MIN_WEAPONS } from '../../constants'
 import { useStore } from '../../store'
-import { PlayResult, getPlayResult, getPlayResultText } from '../../utils'
+import { PlayResult, getPlayResult } from '../../utils'
 
 import './WeaponsTable.css'
 
@@ -83,61 +83,81 @@ export function WeaponsTable(): ReactElement {
                   }}
                   disabled={weaponsArr.length < 4}
                 >
-                  Remove
+                  Discard
                 </button>
               </div>
             </th>
-            {weaponsArr.map((enemyWeapon) => (
-              <td key={`${enemyWeapon.id}-${playerWeapon.id}`}>
-                <button
-                  className={[
-                    getPlayResult(playerWeapon, enemyWeapon) ===
-                      PlayResult.Win && 'win',
-                    getPlayResult(playerWeapon, enemyWeapon) ===
-                      PlayResult.Lose && 'lose',
-                  ]
-                    .filter(Boolean)
-                    .join(' ')}
-                  disabled={
-                    getPlayResult(playerWeapon, enemyWeapon) === PlayResult.Draw
-                  }
-                  onClick={() => {
-                    toggleWeaponDefeat(playerWeapon, enemyWeapon)
-                  }}
-                >
-                  {getPlayResultText(getPlayResult(playerWeapon, enemyWeapon))}
-                </button>
-              </td>
-            ))}
+            {weaponsArr.map((enemyWeapon) => {
+              const key = `${enemyWeapon.id}-${playerWeapon.id}`
+              const result = getPlayResult(playerWeapon, enemyWeapon)
+              let text: string
+              switch (result) {
+                case PlayResult.Win:
+                  text = '+'
+                  break
+                case PlayResult.Draw:
+                  text = 'O'
+                  break
+                case PlayResult.Lose:
+                default:
+                  text = '-'
+                  break
+              }
+              if (result === PlayResult.Draw) {
+                return (
+                  <td key={key}>
+                    <p>{text}</p>
+                  </td>
+                )
+              }
+              return (
+                <td key={key}>
+                  <button
+                    className={[
+                      result === PlayResult.Win && 'win',
+                      result === PlayResult.Lose && 'lose',
+                    ]
+                      .filter(Boolean)
+                      .join(' ')}
+                    onClick={() => {
+                      toggleWeaponDefeat(playerWeapon, enemyWeapon)
+                    }}
+                  >
+                    {text}
+                  </button>
+                </td>
+              )
+            })}
           </tr>
         ))}
-        {weaponsArr.length >= 3 && weaponsArr.length < 12 && (
-          <tr>
-            <th className="new-weapon">
-              <form
-                onSubmit={(event) => {
-                  event.preventDefault()
-                }}
-              >
-                <label htmlFor="weaponName">New Weapon</label>
-                <input
-                  ref={weaponInputRef}
-                  type="text"
-                  name="weaponName"
-                  minLength={1}
-                  placeholder=""
-                  spellCheck={true}
-                  autoCorrect="on"
-                  autoComplete="off"
-                  onChange={handleWeaponInput}
-                />
-                <button onClick={addWeapon} disabled={newWeaponName === ''}>
-                  Add
-                </button>
-              </form>
-            </th>
-          </tr>
-        )}
+        {weaponsArr.length >= NUM_MIN_WEAPONS &&
+          weaponsArr.length < NUM_MAX_WEAPONS && (
+            <tr>
+              <th className="new-weapon">
+                <form
+                  onSubmit={(event) => {
+                    event.preventDefault()
+                  }}
+                >
+                  <label htmlFor="weaponName">Append Apparatus</label>
+                  <input
+                    ref={weaponInputRef}
+                    type="text"
+                    name="weaponName"
+                    minLength={1}
+                    placeholder=""
+                    spellCheck={true}
+                    autoCorrect="on"
+                    autoComplete="off"
+                    onChange={handleWeaponInput}
+                  />
+                  <button onClick={addWeapon} disabled={newWeaponName === ''}>
+                    Append
+                  </button>
+                </form>
+              </th>
+            </tr>
+          )}
       </tbody>
     </table>
   )

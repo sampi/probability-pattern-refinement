@@ -1,0 +1,19 @@
+.modal.editor[open] {
+  margin: 0;
+  padding: 0;
+  width: 100vw;
+  height: 100vh;
+  max-width: 100vw;
+  max-height: 100vh;
+  inset-block-start: 0;
+  inset-inline-end: 0;
+  inset-block-end: 0;
+  inset-inline-start: 0;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+.modal .container {
+  display: flex;
+  flex-direction: row;
+}

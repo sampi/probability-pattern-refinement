@@ -17,7 +17,7 @@ export function Leaderboard(): ReactElement {
 
   return (
     <section className="leaderboard">
-      <h2>Employee ranking</h2>
+      <h2>Quarterly Ranking</h2>
       <ul>
         {/* @TODO empty state */}
         {Object.entries(leaderboard)

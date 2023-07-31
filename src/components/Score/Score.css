@@ -9,3 +9,12 @@
   display: inline-block;
   margin: 0;
 }
+
+/**
+ * Normally I wouldn't like to mix leading/trailing margins
+ * but I'm running out of time to hand in the assignment,
+ * so here we are.
+ */
+.score .currentPlayer h2 {
+  margin-block-end: 1rem;
+}

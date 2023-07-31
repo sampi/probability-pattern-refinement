@@ -5,3 +5,6 @@
 .modal.name[open] form > *:not(:last-child) {
   margin-block-end: 1rem;
 }
+.modal.name[open] form input {
+  padding: 0.5rem 1rem;
+}
