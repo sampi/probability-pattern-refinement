@@ -1,16 +1,16 @@
-import React from 'react'
 import { getStraightPath } from 'reactflow'
 
-import { getEdgeParams } from './utils.js'
+import { getEdgeParams } from './utils'
+
+import type { ReactNode } from 'react'
+import type { ConnectionLineComponentProps } from 'reactflow'
 
 function FloatingConnectionLine({
   toX,
   toY,
-  fromPosition,
-  toPosition,
   fromNode,
-}) {
-  if (!fromNode) {
+}: ConnectionLineComponentProps): ReactNode {
+  if (fromNode == null) {
     return null
   }
 
@@ -21,10 +21,10 @@ function FloatingConnectionLine({
     positionAbsolute: { x: toX, y: toY },
   }
 
-  const { sx, sy } = getEdgeParams(fromNode, targetNode)
+  const { sourceX, sourceY } = getEdgeParams(fromNode, targetNode)
   const [edgePath] = getStraightPath({
-    sourceX: sx,
-    sourceY: sy,
+    sourceX,
+    sourceY,
     targetX: toX,
     targetY: toY,
   })

@@ -1,8 +1,23 @@
 import { Position } from 'reactflow'
 
+import type { Node, XYPosition } from 'reactflow'
+
+export type MinimalFromNode = Pick<
+  Node,
+  'width' | 'height' | 'positionAbsolute'
+>
+export type MinimalToNode = Pick<Node, 'positionAbsolute'>
+
+/**
+ * @see https://reactflow.dev/docs/examples/edges/floating-edges/
+ */
+
 // this helper function returns the intersection point
 // of the line between the center of the intersectionNode and the target node
-function getNodeIntersection(intersectionNode, targetNode) {
+function getNodeIntersection(
+  intersectionNode: MinimalFromNode,
+  targetNode: MinimalToNode,
+): XYPosition {
   // https://math.stackexchange.com/questions/1724792/an-algorithm-for-finding-the-intersection-point-between-a-center-of-vision-and-a
   const {
     width: intersectionNodeWidth,
@@ -10,6 +25,15 @@ function getNodeIntersection(intersectionNode, targetNode) {
     positionAbsolute: intersectionNodePosition,
   } = intersectionNode
   const targetPosition = targetNode.positionAbsolute
+
+  if (
+    intersectionNodeWidth == null ||
+    intersectionNodeHeight == null ||
+    intersectionNodePosition == null ||
+    targetPosition == null
+  ) {
+    return { x: 0, y: 0 }
+  }
 
   const w = intersectionNodeWidth / 2
   const h = intersectionNodeHeight / 2
@@ -31,8 +55,16 @@ function getNodeIntersection(intersectionNode, targetNode) {
 }
 
 // returns the position (top,right,bottom or right) passed node compared to the intersection point
-function getEdgePosition(node, intersectionPoint) {
+function getEdgePosition(
+  node: MinimalFromNode,
+  intersectionPoint: XYPosition,
+): Position {
   const n = { ...node.positionAbsolute, ...node }
+
+  if (n.x == null || n.y == null || n.width == null || n.height == null) {
+    return Position.Top
+  }
+
   const nx = Math.round(n.x)
   const ny = Math.round(n.y)
   const px = Math.round(intersectionPoint.x)
@@ -55,19 +87,29 @@ function getEdgePosition(node, intersectionPoint) {
 }
 
 // returns the parameters (sx, sy, tx, ty, sourcePos, targetPos) you need to create an edge
-export function getEdgeParams(source, target) {
+export function getEdgeParams(
+  source: MinimalFromNode,
+  target: MinimalToNode,
+): {
+  sourceX: number
+  sourceY: number
+  targetX: number
+  targetY: number
+  sourcePosition: Position
+  targetPosition: Position
+} {
   const sourceIntersectionPoint = getNodeIntersection(source, target)
   const targetIntersectionPoint = getNodeIntersection(target, source)
 
-  const sourcePos = getEdgePosition(source, sourceIntersectionPoint)
-  const targetPos = getEdgePosition(target, targetIntersectionPoint)
+  const sourcePosition = getEdgePosition(source, sourceIntersectionPoint)
+  const targetPosition = getEdgePosition(target, targetIntersectionPoint)
 
   return {
-    sx: sourceIntersectionPoint.x,
-    sy: sourceIntersectionPoint.y,
-    tx: targetIntersectionPoint.x,
-    ty: targetIntersectionPoint.y,
-    sourcePos,
-    targetPos,
+    sourceX: sourceIntersectionPoint.x,
+    sourceY: sourceIntersectionPoint.y,
+    targetX: targetIntersectionPoint.x,
+    targetY: targetIntersectionPoint.y,
+    sourcePosition,
+    targetPosition,
   }
 }
