@@ -13,6 +13,7 @@ import type {
 interface ModalProps extends PropsWithChildren {
   open: HTMLDialogElement['open']
   locked: boolean
+  className?: HTMLDialogElement['className']
   onClose: () => void
 }
 
@@ -23,13 +24,14 @@ export function Modal({
   open,
   locked,
   onClose,
+  className = '',
   children,
 }: ModalProps): ReactElement {
   const modalRef = useRef<HTMLDialogElement | null>(null)
 
-  const className = useMemo(
-    () => ['modal', !open && 'is-closing'].filter(Boolean).join(' '),
-    [open],
+  const nextClassName = useMemo(
+    () => ['modal', !open && 'is-closing', className].filter(Boolean).join(' '),
+    [className, open],
   )
 
   const onCancel: ReactEventHandler<HTMLDialogElement> = useCallback(
@@ -67,7 +69,7 @@ export function Modal({
   return (
     <dialog
       ref={modalRef}
-      className={className}
+      className={nextClassName}
       onClose={onClose}
       onCancel={onCancel}
       onClick={onClick}

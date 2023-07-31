@@ -1,3 +1,15 @@
 .weapon.active button {
   outline: 1px solid hotpink;
 }
+
+.weapons-table {
+  width: 100%;
+  height: 40%;
+  text-align: center;
+  table-layout: fixed;
+}
+
+.weapons-table thead th:first-child,
+.weapons-table tbody th {
+  text-align: left;
+}

@@ -1,20 +1,21 @@
 import {
   useEffect,
-  type ReactElement,
   useCallback,
   useState,
   useRef,
-  ChangeEventHandler,
+  useLayoutEffect,
 } from 'react'
 
 import { Modal } from './components/Modal/Modal'
+import { WeaponsMap } from './components/WeaponsMap/WeaponsMap'
 import { COUNTDOWN_SECONDS, SECOND_IN_MS } from './constants'
 import { GameStage, useStore } from './store'
-import { PlayResult, getRandomInt, getPlayResult } from './utils'
+import { PlayResult, getRandomInt, getPlayResult, getGameTitle } from './utils'
 
 import './App.css'
 
 import type { Weapon } from './store'
+import type { ReactElement, ChangeEventHandler } from 'react'
 
 function App(): ReactElement {
   const [countdown, setCountdown] = useState<number>(COUNTDOWN_SECONDS)
@@ -26,6 +27,9 @@ function App(): ReactElement {
 
   const nameInputRef = useRef<HTMLInputElement>(null)
   const [showNameModal, setShowNameModal] = useState<boolean>(false)
+  /**
+   * @TODO always lock when showing but unlock implicitly
+   */
   const [lockNameModal, setLockNameModal] = useState<boolean>(true)
 
   const [stage, setStage] = useStore(({ stage, setStage }) => [stage, setStage])
@@ -33,9 +37,10 @@ function App(): ReactElement {
     playerName,
     setPlayer,
   ])
-  const { weapons, wins, losses, draws } = useStore(
+  const [toggleWeapon] = useStore(({ toggleWeapon }) => [toggleWeapon])
+  const { weaponsArr, wins, losses, draws } = useStore(
     ({ weapons, wins, losses, draws }) => ({
-      weapons,
+      weaponsArr: Object.values(weapons),
       wins,
       losses,
       draws,
@@ -50,11 +55,16 @@ function App(): ReactElement {
   )
 
   /**
-   * Get derived/computed state
+   * Get derived/computed state to avoid denormalization
    */
   useEffect(() => {
     setPlays(wins + losses + draws)
   }, [draws, losses, wins])
+
+  useLayoutEffect(() => {
+    console.log(getGameTitle(weaponsArr))
+    document.title = getGameTitle(weaponsArr)
+  }, [weaponsArr])
 
   useEffect(() => {
     setShowNameModal(playerName === '')
@@ -103,9 +113,9 @@ function App(): ReactElement {
      * Ideally, I wanted to set `enemyWeapon` at the last moment of the countdown
      * but `setStage()` fires faster via zustand than setEnemyWeapon via setState.
      */
-    setEnemyWeapon(weapons[getRandomInt(weapons.length)])
+    setEnemyWeapon(weaponsArr[getRandomInt(weaponsArr.length)])
     setPlayerWeapon(null)
-  }, [setStage, weapons])
+  }, [setStage, weaponsArr])
 
   useEffect(() => {
     let timeoutId: number | undefined
@@ -158,12 +168,75 @@ function App(): ReactElement {
     stage,
   ])
 
+  const [showEditor, setShowEditor] = useState<boolean>(false)
+  const closeEditor = useCallback(() => {
+    setShowEditor(false)
+  }, [])
+
   return (
     <>
       <header>
-        <h1 className="logo">Rock ⊕ Paper ⊕ Scissors</h1>
+        <h1 className="logo">{getGameTitle(weaponsArr)}</h1>
+        <button
+          className="edit"
+          onClick={() => {
+            setShowEditor(true)
+          }}
+        >
+          edit
+        </button>
       </header>
       <main>
+        <Modal
+          className="fullscreen"
+          open={showEditor}
+          locked={false}
+          onClose={closeEditor}
+        >
+          {showEditor && (
+            <>
+              <table className="weapons-table">
+                <thead>
+                  <tr>
+                    <th>
+                      <div>Opponent</div>
+                      <div>Player</div>
+                    </th>
+                    {weaponsArr.map((weapon) => (
+                      <th key={weapon.id}>{weapon.name}</th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {weaponsArr.map((playerWeapon) => (
+                    <tr key={playerWeapon.id}>
+                      <th>{playerWeapon.name}</th>
+                      {weaponsArr.map((enemyWeapon) => (
+                        <td key={`${enemyWeapon.name}-${playerWeapon.name}`}>
+                          <button
+                            disabled={
+                              getPlayResult(playerWeapon, enemyWeapon) ===
+                              PlayResult.Draw
+                            }
+                            onClick={() => {
+                              toggleWeapon(playerWeapon, enemyWeapon)
+                            }}
+                          >
+                            {getPlayResult(
+                              playerWeapon,
+                              enemyWeapon,
+                            ).toString()}
+                          </button>
+                        </td>
+                      ))}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+              <WeaponsMap />
+            </>
+          )}
+        </Modal>
         <Modal
           open={showNameModal}
           locked={lockNameModal}
@@ -174,6 +247,7 @@ function App(): ReactElement {
               event.preventDefault()
             }}
           >
+            <label htmlFor="name">Name</label>
             <input
               ref={nameInputRef}
               type="text"
@@ -218,7 +292,7 @@ function App(): ReactElement {
           <>
             <section className="countdown">{countdown}</section>
             <ul className="weapons">
-              {weapons.map((weapon) => (
+              {weaponsArr.map((weapon) => (
                 <li
                   key={weapon.id}
                   className={[

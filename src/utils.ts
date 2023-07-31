@@ -1,4 +1,4 @@
-import type { Weapon } from './store'
+import type { Weapon, Weapons } from './store'
 
 /**
  * Get a random integer
@@ -38,4 +38,8 @@ export function getPlayResult(
     return PlayResult.Win
   }
   return PlayResult.Lose
+}
+
+export function getGameTitle(weapons: Weapon[]): string {
+  return weapons.map(({ name }) => name).join(' ⊕ ')
 }
