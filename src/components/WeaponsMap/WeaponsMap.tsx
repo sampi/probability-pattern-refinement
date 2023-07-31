@@ -112,7 +112,6 @@ function WeaponsMapFlow(): ReactNode {
   useEffect(() => {
     setNodes(newNodesAndEdges.nodes)
     setEdges(newNodesAndEdges.edges)
-    fitView()
   }, [fitView, newNodesAndEdges, setEdges, setNodes])
 
   return (
@@ -120,6 +119,8 @@ function WeaponsMapFlow(): ReactNode {
       className="weapons-map"
       nodes={nodes}
       edges={edges}
+      onEdgesChange={() => fitView()}
+      onNodesChange={() => fitView()}
       fitView
       edgeTypes={edgeTypes}
       connectionLineComponent={FloatingConnectionLine}
