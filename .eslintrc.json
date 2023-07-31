@@ -1,0 +1,70 @@
+{
+  "root": true,
+  "extends": [
+    "standard-with-typescript",
+    "plugin:prettier/recommended",
+    "plugin:import/recommended",
+    "plugin:import/typescript",
+    "plugin:react/recommended",
+    "plugin:react/jsx-runtime",
+    "plugin:react-hooks/recommended"
+  ],
+  "plugins": ["react-refresh"],
+  "parser": "@typescript-eslint/parser",
+  "parserOptions": {
+    "ecmaVersion": "latest",
+    "sourceType": "module",
+    "project": ["./tsconfig.json", "./tsconfig.node.json"]
+  },
+  "settings": {
+    "react": {
+      "version": "detect"
+    },
+    "import/resolver": {
+      "typescript": true
+    }
+  },
+  "rules": {
+    /* This rule was added by create-vite, to make sure that Hot Reloading works */
+    "react-refresh/only-export-components": [
+      "warn",
+      { "allowConstantExport": true }
+    ],
+    /* This is only used in one place by vite, so it's fine to turn off */
+    "@typescript-eslint/triple-slash-reference": "off",
+    /* For readability, I prefer to have the imports in order, separated by newlines */
+    "import/order": [
+      "error",
+      {
+        "warnOnUnassignedImports": true,
+        "newlines-between": "always",
+        "alphabetize": {
+          "order": "asc",
+          "caseInsensitive": true
+        },
+        "pathGroups": [
+          {
+            "pattern": "{.,..}/*.css",
+            "group": "object",
+            "position": "after"
+          },
+          {
+            "pattern": "{.,..}/**/*.css",
+            "group": "object",
+            "position": "after"
+          }
+        ],
+        "groups": [
+          "builtin",
+          "external",
+          "internal",
+          "parent",
+          "sibling",
+          "index",
+          "object",
+          "type"
+        ]
+      }
+    ]
+  }
+}
