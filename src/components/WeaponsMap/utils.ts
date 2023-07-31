@@ -113,3 +113,20 @@ export function getEdgeParams(
     targetPosition,
   }
 }
+
+/**
+ * Generate `numNodes` equally spaced coordinates along the circumference of a `radius` sized circle
+ */
+export function generateCoordinates(
+  radius: number,
+  numNodes: number,
+): XYPosition[] {
+  const coordinates = []
+  for (let i = 0; i < numNodes; i++) {
+    const theta = (i / numNodes) * (2 * Math.PI) - Math.PI / 2
+    const x = radius * Math.cos(theta)
+    const y = radius * Math.sin(theta)
+    coordinates.push({ x, y })
+  }
+  return coordinates
+}

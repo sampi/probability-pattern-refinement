@@ -46,48 +46,28 @@ export interface Actions {
   incrementDraws: () => void
   incrementLosses: () => void
 
-  toggleWeapon: (playerWeapon: Weapon, enemyWeapon: Weapon) => void
-  /**
-   * Remove playerWeapon from enemyWeapon's `defeats` list
-   * @param playerWeapon will not be able to defeat enemyWeapon
-   * @param enemyWeapon will be safe from the attack of playerWeapon
-   */
-  undefeatWeapon: (playerWeapon: Weapon, enemyWeapon: Weapon) => void
-  /**
-   * Add enemyWeapon to playerWeapon's `defeats` list
-   * @param playerWeapon will be able to defeat the enemyWeapon
-   * @param enemyWeapon will not be safe from the attack of playerWeapon
-   */
-  defeatWeapon: (playerWeapon: Weapon, enemyWeapon: Weapon) => void
+  toggleWeaponDefeat: (playerWeapon: Weapon, enemyWeapon: Weapon) => void
+  createWeapon: (weaponName: Weapon['name']) => void
+  deleteWeapon: (weaponId: Weapon['id']) => void
 }
 
 const defaultWeapons: Record<Weapon['id'], Weapon> = (() => {
-  const ids: string[] = [nanoid(), nanoid(), nanoid(), nanoid(), nanoid()]
+  const ids: string[] = [nanoid(), nanoid(), nanoid()]
   return {
     [ids[0]]: {
       id: ids[0],
       name: 'rock',
-      defeats: [ids[2], ids[4]],
+      defeats: [ids[2]],
     },
     [ids[1]]: {
       id: ids[1],
       name: 'paper',
-      defeats: [ids[0], ids[4]],
+      defeats: [ids[0]],
     },
     [ids[2]]: {
       id: ids[2],
       name: 'scissors',
-      defeats: [ids[1], ids[3]],
-    },
-    [ids[3]]: {
-      id: ids[3],
-      name: 'lizard',
-      defeats: [ids[1], ids[4]],
-    },
-    [ids[4]]: {
-      id: ids[4],
-      name: 'Spock',
-      defeats: [ids[0], ids[2]],
+      defeats: [ids[1]],
     },
   }
 })()
@@ -163,7 +143,7 @@ export const useStore = create(
           })
         },
 
-        toggleWeapon: (playerWeapon, enemyWeapon) => {
+        toggleWeaponDefeat: (playerWeapon, enemyWeapon) => {
           set((state) => {
             if (
               state.weapons[playerWeapon.id].defeats.includes(enemyWeapon.id)
@@ -192,31 +172,23 @@ export const useStore = create(
             }
           })
         },
-
-        undefeatWeapon: (playerWeapon, enemyWeapon) => {
+        createWeapon: (weaponName) => {
           set((state) => {
-            console.log(
-              'undefeat',
-              state.weapons[playerWeapon.id].defeats,
-              'enemy',
-              state.weapons[enemyWeapon.id].defeats,
-            )
-            state.weapons[playerWeapon.id].defeats = state.weapons[
-              enemyWeapon.id
-            ].defeats.filter((defeatedId) => defeatedId === playerWeapon.id)
+            const weaponId = nanoid()
+
+            state.weapons[weaponId] = {
+              id: weaponId,
+              name: weaponName,
+              defeats: Object.keys(state.weapons),
+            }
           })
         },
-        defeatWeapon: (playerWeapon, enemyWeapon) => {
+        deleteWeapon: (weaponId) => {
           set((state) => {
-            console.log(
-              'defeatWeapon',
-              state.weapons[playerWeapon.id].defeats,
-              'enemy',
-              state.weapons[enemyWeapon.id].defeats,
-            )
-            state.weapons[playerWeapon.id].defeats = Array.from(
-              new Set(state.weapons[playerWeapon.id].defeats),
-            )
+            if (state.weapons[weaponId] != null) {
+              // eslint-disable-next-line @typescript-eslint/no-dynamic-delete -- this is safe to delete, I might consider refactoring to Map() in the future
+              delete state.weapons[weaponId]
+            }
           })
         },
       })),

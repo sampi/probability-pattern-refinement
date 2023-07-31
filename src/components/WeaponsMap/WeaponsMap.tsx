@@ -1,37 +1,26 @@
-import { useCallback } from 'react'
+import { useEffect, useMemo, useRef } from 'react'
 import {
-  addEdge,
   Background,
   MarkerType,
   ReactFlow,
+  ReactFlowProvider,
   useEdgesState,
   useNodesState,
+  useReactFlow,
 } from 'reactflow'
 import 'reactflow/dist/style.css'
 
+import { COLORS, DEBOUNCE_MS, GRAPH_CIRCLE_RADIUS } from '../../constants'
+import { useStore } from '../../store'
+
 import FloatingConnectionLine from './FloatingConnectionLine'
 import FloatingEdge from './FloatingEdge'
+import { generateCoordinates } from './utils'
 
 import './WeaponsMap.css'
 
 import type { ComponentType, CSSProperties, ReactNode } from 'react'
-import type { Edge, EdgeProps, Node, OnConnect, XYPosition } from 'reactflow'
-
-/**
- * Generate `numNodes` equally spaced coordinates along the circumference of a `radius` sized circle
- */
-function generateCoordinates(radius: number, numNodes: number): XYPosition[] {
-  const coordinates = []
-  for (let i = 0; i < numNodes; i++) {
-    const theta = (i / numNodes) * (2 * Math.PI) - Math.PI / 2
-    const x = radius * Math.cos(theta)
-    const y = radius * Math.sin(theta)
-    coordinates.push({ x, y })
-  }
-  return coordinates
-}
-
-const coords = generateCoordinates(250, 5)
+import type { Edge, EdgeProps, Node } from 'reactflow'
 
 const sharedNodeStyle = (color?: string): CSSProperties => ({
   borderRadius: '50%',
@@ -43,41 +32,6 @@ const sharedNodeStyle = (color?: string): CSSProperties => ({
   ...(color != null ? { border: `1px solid ${color}` } : {}),
 })
 
-const initialNodes: Node[] = [
-  {
-    id: '0',
-    data: { label: 'rock' },
-    position: coords[0],
-    style: sharedNodeStyle('red'),
-  },
-  {
-    id: '1',
-    data: { label: 'paper' },
-    position: coords[1],
-    style: sharedNodeStyle(),
-  },
-  {
-    id: '2',
-    data: { label: 'scissors' },
-    position: coords[2],
-    style: sharedNodeStyle(),
-  },
-  {
-    id: '3',
-    data: { label: 'Spock' },
-    position: coords[3],
-    style: {
-      ...sharedNodeStyle(),
-    },
-  },
-  {
-    id: '4',
-    data: { label: 'lizard' },
-    position: coords[4],
-    style: sharedNodeStyle(),
-  },
-]
-
 const markerEnd = (color?: string): Edge['markerEnd'] => ({
   type: MarkerType.ArrowClosed,
   width: 40,
@@ -88,130 +42,99 @@ const sharedEdgeStyle = (color?: string): Edge['style'] => ({
   stroke: color,
 })
 
-const initialEdges = [
-  {
-    id: 'e0-4',
-    type: 'floating',
-    markerEnd: markerEnd('red'),
-    source: '0',
-    target: '4',
-    style: sharedEdgeStyle('red'),
-  },
-  {
-    id: 'e0-2',
-    type: 'floating',
-    markerEnd: markerEnd('red'),
-    source: '0',
-    target: '2',
-    style: sharedEdgeStyle('red'),
-  },
-
-  {
-    id: 'e1-0',
-    type: 'floating',
-    markerEnd: markerEnd(),
-    source: '1',
-    target: '0',
-    style: sharedEdgeStyle(),
-  },
-  {
-    id: 'e1-3',
-    type: 'floating',
-    markerEnd: markerEnd(),
-    source: '1',
-    target: '3',
-    style: sharedEdgeStyle(),
-  },
-
-  {
-    id: 'e2-1',
-    type: 'floating',
-    markerEnd: markerEnd(),
-    source: '2',
-    target: '1',
-    style: sharedEdgeStyle(),
-  },
-  {
-    id: 'e2-4',
-    type: 'floating',
-    markerEnd: markerEnd(),
-    source: '2',
-    target: '4',
-    style: sharedEdgeStyle(),
-  },
-
-  {
-    id: 'e3-0',
-    type: 'floating',
-    markerEnd: markerEnd(),
-    source: '3',
-    target: '0',
-    style: sharedEdgeStyle(),
-  },
-  {
-    id: 'e3-2',
-    type: 'floating',
-    markerEnd: markerEnd(),
-    source: '3',
-    target: '2',
-    style: sharedEdgeStyle(),
-  },
-
-  {
-    id: 'e4-1',
-    type: 'floating',
-    markerEnd: markerEnd(),
-    source: '4',
-    target: '1',
-    style: sharedEdgeStyle(),
-  },
-  {
-    id: 'e4-3',
-    type: 'floating',
-    markerEnd: markerEnd(),
-    source: '4',
-    target: '3',
-    style: sharedEdgeStyle(),
-  },
-]
-
 const edgeTypes = {
   floating: FloatingEdge as ComponentType<EdgeProps>,
 }
 
-export function WeaponsMap(): ReactNode {
-  const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes)
-  const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges)
+function WeaponsMapFlow(): ReactNode {
+  const { fitView } = useReactFlow()
 
-  const onConnect: OnConnect = useCallback(
-    (connection) => {
-      setEdges((eds) =>
-        addEdge(
-          {
-            ...connection,
-            type: 'floating',
-            markerEnd: { type: MarkerType.Arrow },
-          },
-          eds,
-        ),
-      )
-    },
-    [setEdges],
+  const timeoutRef = useRef<number>(-1)
+
+  useEffect(() => {
+    const resizeListener = (): void => {
+      if (timeoutRef.current >= 0) {
+        window.clearTimeout(timeoutRef.current)
+      }
+
+      timeoutRef.current = window.setTimeout(() => {
+        fitView()
+      }, DEBOUNCE_MS)
+    }
+
+    window.addEventListener('resize', resizeListener)
+
+    return () => {
+      window.removeEventListener('resize', resizeListener)
+    }
+  }, [fitView])
+
+  const [nodes, setNodes] = useNodesState([])
+  const [edges, setEdges] = useEdgesState([])
+
+  const { weapons, numWeapons } = useStore(({ weapons }) => ({
+    weapons,
+    numWeapons: Object.getOwnPropertyNames(weapons).length,
+  }))
+
+  const coords = useMemo(
+    () => generateCoordinates(GRAPH_CIRCLE_RADIUS, numWeapons),
+    [numWeapons],
   )
+
+  const newNodesAndEdges = useMemo(() => {
+    const newNodes: Node[] = []
+    const newEdges: Edge[] = []
+
+    Object.values(weapons).forEach((weapon, index) => {
+      const color = COLORS[index % COLORS.length]
+      newNodes.push({
+        id: weapon.id,
+        data: { label: weapon.name },
+        position: coords[index],
+        style: sharedNodeStyle(color),
+      })
+
+      weapon.defeats.forEach((defeatId) => {
+        newEdges.push({
+          id: `e${weapon.id}-${defeatId}`,
+          type: 'floating',
+          markerEnd: markerEnd(color),
+          source: weapon.id,
+          target: defeatId,
+          style: sharedEdgeStyle(color),
+        })
+      })
+    })
+    return { nodes: newNodes, edges: newEdges }
+  }, [coords, weapons])
+
+  useEffect(() => {
+    setNodes(newNodesAndEdges.nodes)
+    setEdges(newNodesAndEdges.edges)
+    fitView()
+  }, [fitView, newNodesAndEdges, setEdges, setNodes])
 
   return (
     <ReactFlow
       className="weapons-circle"
       nodes={nodes}
       edges={edges}
-      onNodesChange={onNodesChange}
-      onEdgesChange={onEdgesChange}
-      onConnect={onConnect}
       fitView
       edgeTypes={edgeTypes}
       connectionLineComponent={FloatingConnectionLine}
+      panOnDrag={false}
+      proOptions={{ hideAttribution: true }}
     >
       <Background />
     </ReactFlow>
+  )
+}
+
+export function WeaponsMap(): ReactNode {
+  return (
+    <ReactFlowProvider>
+      <WeaponsMapFlow />
+    </ReactFlowProvider>
   )
 }

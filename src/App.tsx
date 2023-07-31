@@ -8,14 +8,14 @@ import {
 
 import { Modal } from './components/Modal/Modal'
 import { WeaponsMap } from './components/WeaponsMap/WeaponsMap'
-import { COUNTDOWN_SECONDS, SECOND_IN_MS } from './constants'
+import { COLORS, COUNTDOWN_SECONDS, SECOND_IN_MS } from './constants'
 import { GameStage, useStore } from './store'
 import { PlayResult, getRandomInt, getPlayResult, getGameTitle } from './utils'
 
 import './App.css'
 
 import type { Weapon } from './store'
-import type { ReactElement, ChangeEventHandler } from 'react'
+import type { ReactElement, ChangeEventHandler, MouseEventHandler } from 'react'
 
 function App(): ReactElement {
   const [countdown, setCountdown] = useState<number>(COUNTDOWN_SECONDS)
@@ -23,27 +23,32 @@ function App(): ReactElement {
   const [enemyWeapon, setEnemyWeapon] = useState<Weapon | null>(null)
   const [result, setResult] = useState<PlayResult | null>(null)
 
-  const [plays, setPlays] = useState<number>(0)
+  const weaponInputRef = useRef<HTMLInputElement>(null)
+  const [newWeaponName, setNewWeaponName] = useState<string>('')
 
   const nameInputRef = useRef<HTMLInputElement>(null)
   const [showNameModal, setShowNameModal] = useState<boolean>(false)
-  /**
-   * @TODO always lock when showing but unlock implicitly
-   */
-  const [lockNameModal, setLockNameModal] = useState<boolean>(true)
+  const [forceNameModal, setForceNameModal] = useState<boolean>(true)
 
   const [stage, setStage] = useStore(({ stage, setStage }) => [stage, setStage])
   const [playerName, setPlayer] = useStore(({ playerName, setPlayer }) => [
     playerName,
     setPlayer,
   ])
-  const [toggleWeapon] = useStore(({ toggleWeapon }) => [toggleWeapon])
-  const { weaponsArr, wins, losses, draws } = useStore(
+  const { toggleWeaponDefeat, deleteWeapon, createWeapon } = useStore(
+    ({ toggleWeaponDefeat, deleteWeapon, createWeapon }) => ({
+      toggleWeaponDefeat,
+      deleteWeapon,
+      createWeapon,
+    }),
+  )
+  const { weaponsArr, wins, losses, draws, plays } = useStore(
     ({ weapons, wins, losses, draws }) => ({
       weaponsArr: Object.values(weapons),
       wins,
       losses,
       draws,
+      plays: wins + losses + draws,
     }),
   )
   const { incrementWins, incrementLosses, incrementDraws } = useStore(
@@ -54,15 +59,7 @@ function App(): ReactElement {
     }),
   )
 
-  /**
-   * Get derived/computed state to avoid denormalization
-   */
-  useEffect(() => {
-    setPlays(wins + losses + draws)
-  }, [draws, losses, wins])
-
   useLayoutEffect(() => {
-    console.log(getGameTitle(weaponsArr))
     document.title = getGameTitle(weaponsArr)
   }, [weaponsArr])
 
@@ -72,17 +69,16 @@ function App(): ReactElement {
 
   const handleNameInput: ChangeEventHandler<HTMLInputElement> = useCallback(
     (event) => {
-      setLockNameModal(event.target.value === '')
+      setForceNameModal(event.target.value === '')
     },
-    [setLockNameModal],
+    [setForceNameModal],
   )
 
   const closeNameModal = useCallback(() => {
     const newPlayerName = nameInputRef.current?.value ?? ''
-    if (newPlayerName === '') {
-      return
+    if (newPlayerName !== '') {
+      setPlayer(newPlayerName)
     }
-    setPlayer(newPlayerName)
 
     setShowNameModal(false)
 
@@ -99,7 +95,7 @@ function App(): ReactElement {
     // setPlayer('')
 
     setShowNameModal(true)
-    setLockNameModal(true)
+    setForceNameModal(true)
 
     setStage(GameStage.Ready)
     setEnemyWeapon(null)
@@ -173,6 +169,30 @@ function App(): ReactElement {
     setShowEditor(false)
   }, [])
 
+  const removeWeapon = useCallback(
+    (weaponId: string) => {
+      deleteWeapon(weaponId)
+    },
+    [deleteWeapon],
+  )
+
+  const handleWeaponInput: ChangeEventHandler<HTMLInputElement> = useCallback(
+    (event) => {
+      setNewWeaponName(event.target.value)
+    },
+    [],
+  )
+  const addWeapon: MouseEventHandler<HTMLButtonElement> = useCallback(() => {
+    if (newWeaponName !== '') {
+      createWeapon(newWeaponName)
+
+      if (weaponInputRef.current != null) {
+        weaponInputRef.current.value = ''
+        setNewWeaponName('')
+      }
+    }
+  }, [createWeapon, newWeaponName])
+
   return (
     <>
       <header>
@@ -202,10 +222,10 @@ function App(): ReactElement {
                       <div>Opponent</div>
                       <div>Player</div>
                     </th>
-                    {weaponsArr.map((weapon) => (
+                    {weaponsArr.map((weapon, index) => (
                       <th
                         key={weapon.id}
-                        className={encodeURIComponent(weapon.name)}
+                        style={{ color: COLORS[index % COLORS.length] }}
                       >
                         {weapon.name}
                       </th>
@@ -213,13 +233,21 @@ function App(): ReactElement {
                   </tr>
                 </thead>
                 <tbody>
-                  {weaponsArr.map((playerWeapon) => (
+                  {weaponsArr.map((playerWeapon, index) => (
                     <tr key={playerWeapon.id}>
-                      <th className={encodeURIComponent(playerWeapon.name)}>
+                      <th style={{ color: COLORS[index % COLORS.length] }}>
                         {playerWeapon.name}
+                        <button
+                          onClick={() => {
+                            removeWeapon(playerWeapon.id)
+                          }}
+                          disabled={weaponsArr.length < 4}
+                        >
+                          -
+                        </button>
                       </th>
                       {weaponsArr.map((enemyWeapon) => (
-                        <td key={`${enemyWeapon.name}-${playerWeapon.name}`}>
+                        <td key={`${enemyWeapon.id}-${playerWeapon.id}`}>
                           <button
                             className={[
                               getPlayResult(playerWeapon, enemyWeapon) ===
@@ -234,7 +262,7 @@ function App(): ReactElement {
                               PlayResult.Draw
                             }
                             onClick={() => {
-                              toggleWeapon(playerWeapon, enemyWeapon)
+                              toggleWeaponDefeat(playerWeapon, enemyWeapon)
                             }}
                           >
                             {getPlayResult(
@@ -246,6 +274,36 @@ function App(): ReactElement {
                       ))}
                     </tr>
                   ))}
+                  {weaponsArr.length >= 3 && weaponsArr.length < 12 && (
+                    <tr>
+                      <th className="new-weapon">
+                        <form
+                          onSubmit={(event) => {
+                            event.preventDefault()
+                          }}
+                        >
+                          <label htmlFor="weaponName">New Weapon</label>
+                          <input
+                            ref={weaponInputRef}
+                            type="text"
+                            name="weaponName"
+                            minLength={1}
+                            placeholder=""
+                            spellCheck={true}
+                            autoCorrect="on"
+                            autoComplete="off"
+                            onChange={handleWeaponInput}
+                          />
+                          <button
+                            onClick={addWeapon}
+                            disabled={newWeaponName === ''}
+                          >
+                            +
+                          </button>
+                        </form>
+                      </th>
+                    </tr>
+                  )}
                 </tbody>
               </table>
               <WeaponsMap />
@@ -254,7 +312,7 @@ function App(): ReactElement {
         </Modal>
         <Modal
           open={showNameModal}
-          locked={lockNameModal}
+          locked={playerName === ''}
           onClose={closeNameModal}
         >
           <form
@@ -276,25 +334,24 @@ function App(): ReactElement {
             />
             <button
               formMethod="dialog"
-              disabled={lockNameModal}
+              disabled={forceNameModal}
               onClick={closeNameModal}
             >
               Let’s play!
             </button>
-            {/** @TODO handle ESC to cancel the dialog */}
-            {/* playerName !== '' && (
+            {playerName !== '' && (
               <button
                 formMethod="dialog"
                 onClick={() => {
                   if (nameInputRef.current != null) {
-                    nameInputRef.current.value = playerName
+                    nameInputRef.current.value = ''
                   }
                   closeNameModal()
                 }}
               >
                 cancel
               </button>
-              ) */}
+            )}
           </form>
         </Modal>
         <div>Current player: {playerName}</div>
