@@ -117,7 +117,7 @@ function WeaponsMapFlow(): ReactNode {
 
   return (
     <ReactFlow
-      className="weapons-circle"
+      className="weapons-map"
       nodes={nodes}
       edges={edges}
       fitView

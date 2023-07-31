@@ -1,5 +1,59 @@
+:root,
+::backdrop {
+  --colors-gray-100: #edf2f7;
+  --colors-gray-300: #cbd5e0;
+  --colors-gray-400: #a0aec0;
+  --colors-gray-600: #4a5568;
+
+  --colors-blackAlpha-600: rgb(0 0 0 / 0.48);
+  --colors-blackAlpha-900: rgb(0 0 0 / 0.92);
+
+  --colors-darkAlpha-300: rgb(27 33 36 /0.06);
+  --colors-darkAlpha-300: rgb(27 33 36 /0.16);
+  --colors-darkAlpha-400: rgb(27 33 36 /0.24);
+  --colors-darkAlpha-600: rgb(27 33 36 /0.48);
+  --colors-darkAlpha-800: rgb(27 33 36 /0.8);
+  --colors-darkAlpha-900: rgb(27 33 36 /0.92);
+
+  --colors-lightAlpha-100: rgb(190 238 255 /0.06);
+  --colors-lightAlpha-300: rgb(190 238 255 /0.16);
+  --colors-lightAlpha-400: rgb(190 238 255 /0.24);
+  --colors-lightAlpha-600: rgb(190 238 255 /0.48);
+  --colors-lightAlpha-800: rgb(190 238 255 /0.8);
+  --colors-lightAlpha-900: rgb(190 238 255 /0.92);
+
+  --colors-accentAlpha-300: rgb(118 228 247 / 0.16);
+  --colors-accentAlpha-600: rgb(118 228 247 / 0.48);
+  --colors-accentAlpha-800: rgb(118 228 247 / 0.8);
+  --colors-accentAlpha-900: rgb(118 228 247 / 0.92);
+
+  --colors-red-300: #bf616a;
+  --colors-green-300: #a3be8c;
+  --colors-dark-300: rgb(5 16 33);
+
+  --colors-accent-100: rgb(240 255 255);
+  --colors-accent-300: rgb(190 238 255);
+
+  --duration-transition-slow: 0.4s;
+  --duration-transition-medium: 0.2s;
+  --duration-transition-fast: 0.1s;
+
+  --size-topbar: 4rem;
+  --size-bottombar: 8rem;
+
+  --size-pixel-gap: 0.5px;
+  --size-pixel-width: 1px;
+}
+
+* {
+  font-family: 'Rubik', sans-serif;
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
 :root {
-  font-family: system-ui;
+  font-family: 'Rubik', sans-serif;
   line-height: 1.5;
   font-weight: 400;
 
@@ -9,8 +63,6 @@
   text-rendering: optimizeLegibility;
   -webkit-text-size-adjust: 100%;
 
-  box-sizing: border-box;
-
   margin: 0;
   padding: 0;
   font-smooth: auto !important;
@@ -18,44 +70,152 @@
   -moz-osx-font-smoothing: auto !important;
 
   scrollbar-width: thin;
+
+  /* Disable text selection because this is a game, not a normal website */
+  user-select: none;
+}
+
+body {
+  position: relative;
+  margin: 0;
+  overflow: hidden;
+  font-size: 16px;
+}
+body::after {
+  width: 100vw;
+  height: 100vh;
+  box-shadow: inset 0rem 0rem 6rem 1rem var(--colors-blackAlpha-600);
+}
+dialog::after {
+  width: 100%;
+  height: 100%;
+}
+dialog::after,
+body::after {
+  pointer-events: none;
+  content: '';
+  position: absolute;
+  inset-block-start: 0;
+  inset-inline-start: 0;
+  background: repeating-linear-gradient(
+      90deg,
+      var(--color-grid-background) 0 var(--size-pixel-gap),
+      transparent calc(2 * var(--size-pixel-gap))
+        calc(2 * var(--size-pixel-gap) + var(--size-pixel-width))
+    ),
+    repeating-linear-gradient(
+      180deg,
+      var(--color-grid-background) 0 var(--size-pixel-gap),
+      transparent calc(2 * var(--size-pixel-gap))
+        calc(2 * var(--size-pixel-gap) + var(--size-pixel-width))
+    );
 }
 
 ::-webkit-scrollbar {
-  width: 10px;
-  height: 10px;
+  width: 0.75rem;
+  height: 0.75rem;
 }
 ::-webkit-scrollbar {
   background: transparent;
 }
 
+button {
+  font-size: 1rem;
+  padding: 0.5rem 1rem;
+  border-radius: 0;
+  background: transparent;
+  color: var(--color-text);
+  transition-duration: var(--duration-transition-slow);
+  min-width: fit-content;
+  border-width: 3px;
+  border-style: double;
+}
+button.large {
+  font-size: 3rem;
+}
+button:not(:disabled) {
+  cursor: pointer;
+}
+button:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+menu {
+  display: flex;
+  list-style: none;
+  padding: 0;
+}
+menu li:not(:last-child) {
+  padding-inline-end: 1rem;
+}
+
+ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
 @media (prefers-color-scheme: light) {
   :root {
-    color: rgba(0, 0, 0, 0.87);
-    background-color: #efefef;
-    scrollbar-color: var(--chakra-colors-gray-100) var(--chakra-colors-gray-300);
+    --color-text: var(--colors-dark-300);
+    --color-background: var(--colors-accent-100);
+    --color-grid-background: var(--colors-accentAlpha-600);
+
+    scrollbar-color: var(--colors-gray-100) var(--colors-gray-300);
+  }
+  :root,
+  dialog {
+    color: var(--color-text);
+    background-color: var(--color-background);
   }
   :root ::-webkit-scrollbar-track {
-    background: var(--chakra-colors-gray-100);
+    background: var(--colors-gray-100);
   }
   :root ::-webkit-scrollbar-thumb {
-    background: var(--chakra-colors-gray-300);
+    background: var(--colors-gray-300);
   }
 
   ::-webkit-scrollbar-thumb:hover {
-    background: var(--chakra-colors-brand-100);
+    background: var(--colors-accent-300);
+  }
+
+  button {
+    border-color: var(--colors-darkAlpha-600);
+    box-shadow: 0 0 0.25rem var(--colors-darkAlpha-100);
+  }
+  button:not(:disabled):hover {
+    border-color: var(--colors-darkAlpha-800);
+    box-shadow: 0 0.1rem 1rem var(--colors-darkAlpha-300);
   }
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    color: rgba(255, 255, 255, 0.87);
-    background-color: #242424;
-    scrollbar-color: var(--chakra-colors-gray-400) var(--chakra-colors-gray-600);
+    --color-text: var(--colors-accent-300);
+    --color-background: var(--colors-dark-300);
+    --color-grid-background: var(--colors-dark-300);
+
+    scrollbar-color: var(--colors-gray-400) var(--colors-gray-600);
+  }
+  dialog,
+  :root {
+    color: var(--color-text);
+    background-color: var(--color-background);
   }
   :root ::-webkit-scrollbar-track {
-    background: var(--chakra-colors-gray-600);
+    background: var(--colors-gray-600);
   }
   :root ::-webkit-scrollbar-thumb {
-    background: var(--chakra-colors-gray-400);
+    background: var(--colors-gray-400);
+  }
+
+  button {
+    border-color: var(--colors-lightAlpha-600);
+    box-shadow: 0 0 0.25rem var(--colors-lightAlpha-100);
+  }
+  button:not(:disabled):hover {
+    border-color: var(--colors-lightAlpha-800);
+    box-shadow: 0 0.1rem 1rem var(--colors-accentAlpha-300);
   }
 }

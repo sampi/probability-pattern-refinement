@@ -1,3 +1,31 @@
-.weapon.active button {
-  outline: 1px solid hotpink;
+.weapons {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+}
+
+.weapon {
+  width: 100%;
+  flex-grow: 1;
+}
+
+.weapon button {
+  width: 100%;
+  padding-block: 2rem;
+}
+
+@media (prefers-color-scheme: light) {
+  .weapon.active button,
+  .weapon.active button:hover {
+    box-shadow: 0 0.1rem 1rem var(--colors-darkAlpha-600);
+    text-shadow: 0 0.1rem 1rem var(--colors-darkAlpha-600);
+  }
+}
+
+@media (prefers-color-scheme: dark) {
+  .weapon.active button,
+  .weapon.active button:hover {
+    box-shadow: 0 0.1rem 1rem var(--colors-accentAlpha-600);
+    text-shadow: 0 0.1rem 1rem var(--colors-accentAlpha-600);
+  }
 }

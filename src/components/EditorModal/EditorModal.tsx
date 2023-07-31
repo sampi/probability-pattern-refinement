@@ -12,6 +12,10 @@ export function EditorModal({
   showEditor,
   onCloseEditor,
 }: EditorModalProps): ReactElement {
+  if (!showEditor) {
+    return <></>
+  }
+
   return (
     <Modal
       className="fullscreen"

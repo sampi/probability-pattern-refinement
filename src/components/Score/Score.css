@@ -1,0 +1,11 @@
+.score article {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  padding-inline-end: 1rem;
+}
+.score article h3,
+.score article h4 {
+  display: inline-block;
+  margin: 0;
+}

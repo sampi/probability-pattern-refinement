@@ -40,8 +40,18 @@ export function getPlayResult(
   return PlayResult.Lose
 }
 
-export function getGameTitle(weapons: Weapon[]): string {
-  return weapons.map(({ name }) => name).join(' ⊕ ')
+export function getPlayResultText(playResult: PlayResult | null): string {
+  switch (playResult) {
+    case PlayResult.Win:
+      return 'Triumph'
+
+    case PlayResult.Lose:
+      return 'Lapse'
+
+    case PlayResult.Draw:
+    default:
+      return 'Equilibrium'
+  }
 }
 
 export enum GameStage {

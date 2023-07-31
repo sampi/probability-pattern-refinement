@@ -3,6 +3,8 @@
  */
 export const PREFIX = 'rps'
 
+export const TITLE = 'Probability Pattern Refinement'
+
 /**
  * How many seconds should the player have to choose a weapon?
  */

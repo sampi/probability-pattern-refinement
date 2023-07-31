@@ -24,7 +24,7 @@ export function WeaponPicker({
   )
 
   return (
-    <ul className="weapons">
+    <menu className="weapons">
       {weaponsArr.map((weapon) => (
         <li
           key={weapon.id}
@@ -41,6 +41,6 @@ export function WeaponPicker({
           </button>
         </li>
       ))}
-    </ul>
+    </menu>
   )
 }

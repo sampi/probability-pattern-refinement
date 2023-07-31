@@ -1,0 +1,7 @@
+.modal.name[open] form {
+  display: flex;
+  flex-direction: column;
+}
+.modal.name[open] form > *:not(:last-child) {
+  margin-block-end: 1rem;
+}

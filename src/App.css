@@ -1,0 +1,52 @@
+.layout {
+  display: grid;
+  grid-template-columns: 1fr minmax(10rem, 15rem);
+  grid-template-rows: var(--size-topbar) 1fr;
+  gap: 2rem 2rem;
+  grid-template-areas:
+    'logo score'
+    'main score';
+
+  --width: 100vw;
+  --height: 100vh;
+  min-width: var(--width);
+  max-width: var(--width);
+  min-height: var(--height);
+  max-height: var(--height);
+  padding: 1rem;
+}
+main {
+  grid-area: main;
+
+  display: flex;
+  flex-direction: column;
+}
+aside {
+  grid-area: score;
+  overflow: auto;
+}
+
+.content {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  flex-grow: 1;
+  height: 100%;
+  text-align: center;
+}
+footer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  height: var(--size-bottombar);
+}
+
+footer .player {
+  width: 100%;
+  justify-content: flex-end;
+}
+footer .player p {
+  padding-block: 0.5rem;
+}

@@ -3,7 +3,7 @@ import { shallow } from 'zustand/shallow'
 
 import { COLORS } from '../../constants'
 import { useStore } from '../../store'
-import { PlayResult, getPlayResult } from '../../utils'
+import { PlayResult, getPlayResult, getPlayResultText } from '../../utils'
 
 import './WeaponsTable.css'
 
@@ -58,8 +58,8 @@ export function WeaponsTable(): ReactElement {
       <thead>
         <tr>
           <th>
-            <div>Opponent</div>
-            <div>Player</div>
+            <div>Data Processor</div>
+            <div>Employee</div>
           </th>
           {weaponsArr.map((weapon, index) => (
             <th
@@ -75,15 +75,17 @@ export function WeaponsTable(): ReactElement {
         {weaponsArr.map((playerWeapon, index) => (
           <tr key={playerWeapon.id}>
             <th style={{ color: COLORS[index % COLORS.length] }}>
-              {playerWeapon.name}
-              <button
-                onClick={() => {
-                  deleteWeapon(playerWeapon.id)
-                }}
-                disabled={weaponsArr.length < 4}
-              >
-                -
-              </button>
+              <div className="control">
+                <p>{playerWeapon.name}</p>
+                <button
+                  onClick={() => {
+                    deleteWeapon(playerWeapon.id)
+                  }}
+                  disabled={weaponsArr.length < 4}
+                >
+                  Remove
+                </button>
+              </div>
             </th>
             {weaponsArr.map((enemyWeapon) => (
               <td key={`${enemyWeapon.id}-${playerWeapon.id}`}>
@@ -103,7 +105,7 @@ export function WeaponsTable(): ReactElement {
                     toggleWeaponDefeat(playerWeapon, enemyWeapon)
                   }}
                 >
-                  {getPlayResult(playerWeapon, enemyWeapon).toString()}
+                  {getPlayResultText(getPlayResult(playerWeapon, enemyWeapon))}
                 </button>
               </td>
             ))}
@@ -130,7 +132,7 @@ export function WeaponsTable(): ReactElement {
                   onChange={handleWeaponInput}
                 />
                 <button onClick={addWeapon} disabled={newWeaponName === ''}>
-                  +
+                  Add
                 </button>
               </form>
             </th>

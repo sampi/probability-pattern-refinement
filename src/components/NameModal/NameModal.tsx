@@ -1,6 +1,8 @@
 import { useStore } from '../../store'
 import { Modal } from '../Modal/Modal'
 
+import './NameModal.css'
+
 import type { ChangeEventHandler, ReactElement, RefObject } from 'react'
 
 interface NameModalProps {
@@ -22,8 +24,13 @@ export function NameModal({
     playerName,
   }))
 
+  if (!showNameModal) {
+    return <></>
+  }
+
   return (
     <Modal
+      className="name"
       open={showNameModal}
       locked={playerName === ''}
       onClose={onCloseNameModal}
@@ -33,13 +40,13 @@ export function NameModal({
           event.preventDefault()
         }}
       >
-        <label htmlFor="name">Name</label>
+        <label htmlFor="name">Employee Name</label>
         <input
           ref={nameInputRef}
           type="text"
           name="name"
           minLength={1}
-          placeholder=""
+          placeholder={playerName !== '' ? playerName : 'Mark S'}
           spellCheck={false}
           autoCorrect="off"
           autoComplete="name"
@@ -50,7 +57,7 @@ export function NameModal({
           disabled={forceNameModal}
           onClick={onCloseNameModal}
         >
-          Let’s play!
+          Log In
         </button>
         {playerName !== '' && (
           <button
@@ -62,7 +69,7 @@ export function NameModal({
               onCloseNameModal()
             }}
           >
-            cancel
+            Cancel
           </button>
         )}
       </form>

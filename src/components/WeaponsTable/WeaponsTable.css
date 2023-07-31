@@ -1,6 +1,6 @@
 .weapons-table {
-  width: 100%;
-  height: 40%;
+  width: 100vw;
+  height: 40vh;
   text-align: center;
   table-layout: fixed;
 }
@@ -14,21 +14,51 @@
   );
 }
 .weapons-table thead th:first-child div:first-child {
-  text-align: right;
-  padding-right: 0.5rem;
+  text-align: end;
+  padding-inline-end: 0.5rem;
 }
 .weapons-table thead th:first-child div:last-child {
-  text-align: left;
-  padding-left: 0.5rem;
-}
-
-.weapons-table .lose {
-  background-color: red;
-}
-.weapons-table .win {
-  background-color: green;
+  text-align: start;
+  padding-inline-end: 0.5rem;
 }
 
 .weapons-table th {
   border: 1px solid currentColor;
+}
+.weapons-table th .control {
+  display: flex;
+  justify-content: space-between;
+  padding: 1rem;
+}
+.weapons-table th .control button {
+  padding: 0.5rem;
+}
+.weapons-table th .control p {
+  padding-block: 0.5rem;
+}
+
+.weapons-table td button {
+  width: 90%;
+}
+.weapons-table .lose,
+.weapons-table .win {
+  color: var(--colors-blackAlpha-900);
+}
+.weapons-table .lose {
+  background-color: var(--colors-red-300);
+}
+.weapons-table .win {
+  background-color: var(--colors-green-300);
+}
+
+.weapons-table .new-weapon form {
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+}
+.weapons-table .new-weapon label {
+  text-align: start;
+}
+.weapons-table .new-weapon form > *:not(:last-child) {
+  margin-block-end: 1rem;
 }

@@ -1,6 +1,9 @@
 import { shallow } from 'zustand/shallow'
 
 import { useStore } from '../../store'
+import { getPlayResultText, PlayResult } from '../../utils'
+
+import './Leaderboard.css'
 
 import type { ReactElement } from 'react'
 
@@ -14,8 +17,9 @@ export function Leaderboard(): ReactElement {
 
   return (
     <section className="leaderboard">
-      <h2>Leaderboard</h2>
+      <h2>Employee ranking</h2>
       <ul>
+        {/* @TODO empty state */}
         {Object.entries(leaderboard)
           .sort(([aName, aScore], [bName, bScore]) => {
             /** Return the player with most scores first */
@@ -40,15 +44,15 @@ export function Leaderboard(): ReactElement {
             <li key={name}>
               <h3>{name}</h3>
               <article>
-                <h4>Wins</h4>
+                <h4>{getPlayResultText(PlayResult.Win)}</h4>
                 <p>{score.wins}</p>
               </article>
               <article>
-                <h4>Draws</h4>
+                <h4>{getPlayResultText(PlayResult.Draw)}</h4>
                 <p>{score.draws}</p>
               </article>
               <article>
-                <h4>Losses</h4>
+                <h4>{getPlayResultText(PlayResult.Lose)}</h4>
                 <p>{score.losses}</p>
               </article>
             </li>

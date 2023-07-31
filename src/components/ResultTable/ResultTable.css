@@ -1,0 +1,31 @@
+.result table {
+  table-layout: fixed;
+  border-collapse: collapse;
+  width: 60%;
+  margin: 0 auto;
+}
+
+.result table,
+.result td {
+  border-inline-width: 0;
+  border-block-width: 3px;
+  border-style: double;
+  border-color: var(--colors-accent-300);
+}
+
+.result td {
+  border-style: solid;
+  text-align: start;
+  padding: 1rem;
+}
+
+.result td:last-child {
+  text-align: end;
+}
+
+.result .outcome {
+  font-size: 2rem;
+}
+.result .outcome td {
+  padding-block: 2rem;
+}

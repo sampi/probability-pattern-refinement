@@ -1,4 +1,7 @@
 import { useStore } from '../../store'
+import { PlayResult, getPlayResultText } from '../../utils'
+
+import './Score.css'
 
 import type { ReactElement } from 'react'
 
@@ -14,21 +17,21 @@ export function Score(): ReactElement {
 
   return (
     <section className="currentPlayer">
-      <h2>Score</h2>
+      <h2>Enumerative Assemblage</h2>
       <article>
-        <h3>Losses</h3>
-        <span>{losses}</span>
-      </article>
-      <article>
-        <h3>Draws</h3>
-        <span>{draws}</span>
-      </article>
-      <article>
-        <h3>Wins</h3>
+        <h3>{getPlayResultText(PlayResult.Win)}</h3>
         <span>{wins}</span>
       </article>
       <article>
-        <h3>Plays</h3>
+        <h3>{getPlayResultText(PlayResult.Draw)}</h3>
+        <span>{draws}</span>
+      </article>
+      <article>
+        <h3>{getPlayResultText(PlayResult.Lose)}</h3>
+        <span>{losses}</span>
+      </article>
+      <article>
+        <h3>Patterns</h3>
         <span>{plays}</span>
       </article>
     </section>

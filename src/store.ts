@@ -12,7 +12,7 @@ export interface Weapon {
 }
 export type Weapons = Record<Weapon['id'], Weapon>
 
-type PlayerName = string
+export type PlayerName = string
 
 interface Score {
   wins: number

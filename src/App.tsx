@@ -1,13 +1,14 @@
 import { useEffect, useCallback, useState, useRef } from 'react'
 import { shallow } from 'zustand/shallow'
 
+import { Countdown } from './components/Countdown/Countdown'
 import { EditorModal } from './components/EditorModal/EditorModal'
+import { Header } from './components/Header/Header'
 import { Leaderboard } from './components/Leaderboard/Leaderboard'
-import { Logo } from './components/Logo/Logo'
 import { NameModal } from './components/NameModal/NameModal'
+import { ResultTable } from './components/ResultTable/ResultTable'
 import { Score } from './components/Score/Score'
 import { WeaponPicker } from './components/WeaponPicker/WeaponPicker'
-import { COUNTDOWN_SECONDS, SECOND_IN_MS } from './constants'
 import { useStore } from './store'
 import { PlayResult, getRandomInt, getPlayResult, GameStage } from './utils'
 
@@ -17,7 +18,6 @@ import type { Weapon } from './store'
 import type { ReactElement, ChangeEventHandler } from 'react'
 
 function App(): ReactElement {
-  const [countdown, setCountdown] = useState<number>(COUNTDOWN_SECONDS)
   const [playerWeapon, setPlayerWeapon] = useState<Weapon | null>(null)
   const [enemyWeapon, setEnemyWeapon] = useState<Weapon | null>(null)
   const [result, setResult] = useState<PlayResult | null>(null)
@@ -50,6 +50,16 @@ function App(): ReactElement {
     }),
     shallow,
   )
+
+  const onCountdownEnd = useCallback(() => {
+    setEnemyWeapon(weaponsArr[getRandomInt(weaponsArr.length)])
+    setStage(GameStage.Evaluating)
+  }, [weaponsArr])
+
+  const [showEditor, setShowEditor] = useState<boolean>(false)
+  const onCloseEditor = useCallback(() => {
+    setShowEditor(false)
+  }, [])
 
   useEffect(() => {
     setShowNameModal(playerName === '')
@@ -90,31 +100,9 @@ function App(): ReactElement {
 
   const startGame = useCallback(() => {
     setStage(GameStage.Countdown)
-    setCountdown(COUNTDOWN_SECONDS)
     setEnemyWeapon(null)
     setPlayerWeapon(null)
   }, [setStage])
-
-  useEffect(() => {
-    let timeoutId: number = -1
-
-    if (stage === GameStage.Countdown) {
-      if (countdown > 0) {
-        timeoutId = setTimeout(() => {
-          setCountdown((c) => c - 1)
-        }, SECOND_IN_MS)
-      } else {
-        setEnemyWeapon(weaponsArr[getRandomInt(weaponsArr.length)])
-        setStage(GameStage.Evaluating)
-      }
-    }
-
-    return () => {
-      if (timeoutId >= 0) {
-        clearTimeout(timeoutId)
-      }
-    }
-  }, [countdown, setStage, stage, weaponsArr])
 
   useEffect(() => {
     if (stage === GameStage.Evaluating) {
@@ -147,71 +135,85 @@ function App(): ReactElement {
     stage,
   ])
 
-  const [showEditor, setShowEditor] = useState<boolean>(false)
-  const onCloseEditor = useCallback(() => {
-    setShowEditor(false)
-  }, [])
-
   return (
-    <>
-      <header>
-        <Logo />
-        <button
-          className="edit"
-          onClick={() => {
-            setShowEditor(true)
-          }}
-        >
-          edit weapons
-        </button>
-      </header>
-      <main>
-        <NameModal
-          nameInputRef={nameInputRef}
-          showNameModal={showNameModal}
-          forceNameModal={forceNameModal}
-          onCloseNameModal={onCloseNameModal}
-          handleNameInput={handleNameInput}
-        />
-        <EditorModal showEditor={showEditor} onCloseEditor={onCloseEditor} />
+    <div className="layout">
+      <Header
+        setShowEditor={setShowEditor}
+        disableEditor={stage === GameStage.Countdown}
+      />
 
-        <div>Current player: {playerName}</div>
+      <main>
         {stage === GameStage.Ready && (
           <>
-            <button onClick={startGame}>start</button>
+            <div className="content">
+              <button className="large" onClick={startGame}>
+                Initiate Analysis
+              </button>
+            </div>
           </>
         )}
         {stage === GameStage.Countdown && (
           <>
-            <section className="countdown">{countdown}</section>
-            <WeaponPicker
-              playerWeapon={playerWeapon}
-              setPlayerWeapon={setPlayerWeapon}
-            />
+            <div className="content">
+              <Countdown onCountdownEnd={onCountdownEnd} />
+            </div>
+            <footer>
+              <WeaponPicker
+                playerWeapon={playerWeapon}
+                setPlayerWeapon={setPlayerWeapon}
+              />
+            </footer>
           </>
         )}
         {stage === GameStage.Done && (
           <>
-            <article className="enemyWeapon">
-              computer: {enemyWeapon?.name}
-            </article>
-            <article className="playerWeapon">
-              {playerName}: {playerWeapon?.name}
-            </article>
-            {/* @TODO explain why (e.g. rock defeats scissors) */}
-            <div>
-              {playerName} {result}
+            <div className="content">
+              <ResultTable
+                playerName={playerName}
+                enemyWeapon={enemyWeapon}
+                playerWeapon={playerWeapon}
+                result={result}
+              />
             </div>
-            <button onClick={startGame}>play again</button>
+            <footer>
+              <menu>
+                <li>
+                  <button className="large" onClick={startGame}>
+                    Rerun Analysis
+                  </button>
+                </li>
+              </menu>
+            </footer>
           </>
         )}
-        <button onClick={resetGame}>new player</button>
+        {stage !== GameStage.Countdown && (
+          <footer>
+            <menu className="player">
+              <li>
+                <p>Current Employee: {playerName}</p>
+              </li>
+              <li>
+                <button onClick={resetGame}>Log Off</button>
+              </li>
+            </menu>
+          </footer>
+        )}
       </main>
+
       <aside className="score">
         <Score />
         <Leaderboard />
       </aside>
-    </>
+
+      <NameModal
+        nameInputRef={nameInputRef}
+        showNameModal={showNameModal}
+        forceNameModal={forceNameModal}
+        onCloseNameModal={onCloseNameModal}
+        handleNameInput={handleNameInput}
+      />
+      <EditorModal showEditor={showEditor} onCloseEditor={onCloseEditor} />
+    </div>
   )
 }
 

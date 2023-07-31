@@ -1,0 +1,14 @@
+/**
+ * For sub-score styles
+ * @see src/Score/Score.css
+ */
+
+.leaderboard ul {
+  list-style: none;
+}
+.leaderboard h2 {
+  margin-block-start: 1rem;
+}
+.leaderboard h3 {
+  margin-block-start: 0.5rem;
+}
