@@ -94,7 +94,7 @@ function incrementScore(type: keyof Score, state: State): void {
 
   if (playerName !== '') {
     if (state.leaderboard[playerName] == null) {
-      state.leaderboard[playerName] = initialScore
+      state.leaderboard[playerName] = { ...initialScore }
     }
     state.leaderboard[playerName][type]++
   }

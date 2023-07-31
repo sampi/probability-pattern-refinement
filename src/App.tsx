@@ -42,13 +42,14 @@ function App(): ReactElement {
       createWeapon,
     }),
   )
-  const { weaponsArr, wins, losses, draws, plays } = useStore(
-    ({ weapons, wins, losses, draws }) => ({
+  const { weaponsArr, wins, losses, draws, plays, leaderboard } = useStore(
+    ({ weapons, wins, losses, draws, leaderboard }) => ({
       weaponsArr: Object.values(weapons),
       wins,
       losses,
       draws,
       plays: wins + losses + draws,
+      leaderboard,
     }),
   )
   const { incrementWins, incrementLosses, incrementDraws } = useStore(
@@ -404,22 +405,67 @@ function App(): ReactElement {
         <button onClick={resetGame}>new player</button>
       </main>
       <aside className="score">
-        <article>
-          <h4>Losses</h4>
-          <span>{losses}</span>
-        </article>
-        <article>
-          <h4>Draws</h4>
-          <span>{draws}</span>
-        </article>
-        <article>
-          <h4>Wins</h4>
-          <span>{wins}</span>
-        </article>
-        <article>
-          <h4>Plays</h4>
-          <span>{plays}</span>
-        </article>
+        <section className="currentPlayer">
+          <h2>Score</h2>
+          <article>
+            <h3>Losses</h3>
+            <span>{losses}</span>
+          </article>
+          <article>
+            <h3>Draws</h3>
+            <span>{draws}</span>
+          </article>
+          <article>
+            <h3>Wins</h3>
+            <span>{wins}</span>
+          </article>
+          <article>
+            <h3>Plays</h3>
+            <span>{plays}</span>
+          </article>
+        </section>
+        <section className="leaderboard">
+          <h2>Leaderboard</h2>
+          <ul>
+            {Object.entries(leaderboard)
+              .sort(([aName, aScore], [bName, bScore]) => {
+                /** Return the player with most scores first */
+                if (bScore.wins !== aScore.wins) {
+                  return bScore.wins - aScore.wins
+                }
+
+                /** If there is a tie, return the player with the least losses */
+                if (aScore.losses !== bScore.losses) {
+                  return aScore.losses - bScore.losses
+                }
+
+                /** If there is a tie, return the player with the least draws */
+                if (aScore.draws !== bScore.draws) {
+                  return aScore.draws - bScore.draws
+                }
+
+                /** If there is a tie, return sorted alphabetically */
+                return aName.localeCompare(bName)
+              })
+              .map(([name, score]) => (
+                <li key={name}>
+                  <h3>{name}</h3>
+                  <article>
+                    <h4>Wins</h4>
+                    <p>{score.wins}</p>
+                  </article>
+                  <article>
+                    <h4>Draws</h4>
+                    <p>{score.draws}</p>
+                  </article>
+                  <article>
+                    <h4>Losses</h4>
+                    <p>{score.losses}</p>
+                  </article>
+                </li>
+              ))}
+          </ul>
+        </section>
       </aside>
     </>
   )
