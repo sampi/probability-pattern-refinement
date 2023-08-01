@@ -83,7 +83,7 @@ export function App(): ReactElement {
     setPlayerWeapon(null)
   }, [setPlayer, setStage])
 
-  const resetGame = useCallback(() => {
+  const changePlayer = useCallback(() => {
     if (nameInputRef?.current != null) {
       nameInputRef.current.value = ''
     }
@@ -95,7 +95,8 @@ export function App(): ReactElement {
     setEnemyWeapon(null)
     setPlayerWeapon(null)
   }, [setStage])
-  const startGame = useCallback(() => {
+
+  const playGame = useCallback(() => {
     setStage(GameStage.Countdown)
     setEnemyWeapon(null)
     setPlayerWeapon(null)
@@ -143,7 +144,7 @@ export function App(): ReactElement {
         {stage === GameStage.Ready && (
           <>
             <div className="content">
-              <button className="large" onClick={startGame}>
+              <button className="large" onClick={playGame}>
                 Initiate Analysis
               </button>
             </div>
@@ -175,7 +176,7 @@ export function App(): ReactElement {
             <footer>
               <menu>
                 <li>
-                  <button className="large" onClick={startGame}>
+                  <button className="large" onClick={playGame}>
                     Rerun Analysis
                   </button>
                 </li>
@@ -190,7 +191,7 @@ export function App(): ReactElement {
                 <p>Current Employee: {playerName}</p>
               </li>
               <li>
-                <button onClick={resetGame}>Log Off</button>
+                <button onClick={changePlayer}>Log Off</button>
               </li>
             </menu>
           </footer>

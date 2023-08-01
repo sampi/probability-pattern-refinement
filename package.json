@@ -10,7 +10,8 @@
     "lint": "eslint src/ --ext js,ts,tsx  --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview",
     "predeploy": "npm run build",
-    "deploy": "echo probability.sampi.io > ./dist/CNAME && gh-pages -d dist"
+    "deploy": "echo probability.sampi.io > ./dist/CNAME && gh-pages -d dist",
+    "test": "echo 'No unit tests written.' && exit 0;"
   },
   "dependencies": {
     "immer": "10.0.2",
